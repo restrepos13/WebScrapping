@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radar · Prospección</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=Spline+Sans+Mono:wght@400;500;600&display=swap">
+<style>
+:root{--ink:#ECEDEF;--ink2:#9CA2AD;--ink3:#5E6470;--line:rgba(255,255,255,.09);--amber:#FFB020;--verde:#39FF6E}
+*{box-sizing:border-box}
+html,body{margin:0;background:#05060A;color:var(--ink);font-family:"Archivo",system-ui,sans-serif}
+body{display:grid;place-items:center;min-height:100dvh;padding:24px;background:
+  radial-gradient(600px 300px at 70% 20%,rgba(255,176,32,.05),transparent),
+  radial-gradient(500px 300px at 25% 85%,rgba(57,255,110,.04),transparent),#05060A}
+.wrap{width:min(760px,100%)}
+h1{font-size:clamp(28px,5vw,44px);font-weight:900;font-stretch:112%;letter-spacing:-.02em;margin:0 0 4px}
+.sub{font-family:"Spline Sans Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin:0 0 34px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{display:block;text-decoration:none;color:var(--ink);background:rgba(255,255,255,.03);
+  border:1px solid var(--line);border-radius:16px;padding:26px 24px;transition:border-color .15s,transform .15s}
+.card:hover{transform:translateY(-2px)}
+.card.mapa:hover{border-color:var(--amber)}
+.card.pros:hover{border-color:var(--verde)}
+.card .tag{font-family:"Spline Sans Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
+.card.mapa .tag{color:var(--amber)}
+.card.pros .tag{color:var(--verde)}
+.card h2{margin:8px 0 8px;font-size:22px;font-weight:850;font-stretch:108%;letter-spacing:-.01em}
+.card p{margin:0;font-size:13px;color:var(--ink2);line-height:1.55}
+.card .go{display:inline-block;margin-top:16px;font-family:"Spline Sans Mono",ui-monospace,monospace;font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--ink3)}
+.card:hover .go{color:var(--ink)}
+footer{margin-top:28px;font-size:11px;color:var(--ink3);font-family:"Spline Sans Mono",ui-monospace,monospace}
+@media (max-width:620px){.cards{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Radar Nocturno</h1>
+  <p class="sub">Prospección B2B · Medellín y alrededores</p>
+  <div class="cards">
+    <a class="card mapa" href="mapa.html">
+      <span class="tag">Mapa</span>
+      <h2>Radar de negocios</h2>
+      <p>6.331 negocios auditados sobre el croquis de la ciudad. Filtros por señal, score de oportunidad, ranking, selección por área, mensajes con WhatsApp listo y estados compartidos.</p>
+      <span class="go">Abrir mapa →</span>
+    </a>
+    <a class="card pros" href="tracker-prospeccion.html">
+      <span class="tag">Prospección</span>
+      <h2>Listado de campaña</h2>
+      <p>Los 82 prospectos curados de los radares (webcam, OnlyFans, clínicas, hoteles) con su mensaje personalizado, toques 1-2-3 con fecha, notas y exportación a Excel.</p>
+      <span class="go">Abrir listado →</span>
+    </a>
+  </div>
+  <footer id="pie">estados sincronizados entre el equipo · datos: pipeline local</footer>
+</div>
+<script>
+fetch("data/negocios.json",{method:"HEAD"}).catch(()=>{});
+</script>
+</body>
+</html>

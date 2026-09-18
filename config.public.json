@@ -1,0 +1,63 @@
+{
+  "zonas": {
+    "medellin": {
+      "nombre": "Medellín y alrededores",
+      "centro": [
+        6.2442,
+        -75.5812
+      ],
+      "zoom": 12,
+      "subzonas": [
+        "El Poblado, Medellín",
+        "Laureles, Medellín",
+        "Centro, Medellín",
+        "Belén, Medellín",
+        "Envigado, Antioquia",
+        "Itagüí, Antioquia",
+        "Sabaneta, Antioquia",
+        "Bello, Antioquia"
+      ]
+    },
+    "bucaramanga": {
+      "nombre": "Bucaramanga y alrededores",
+      "centro": [
+        7.1193,
+        -73.1227
+      ],
+      "zoom": 12,
+      "subzonas": [
+        "Cabecera, Bucaramanga",
+        "Centro, Bucaramanga",
+        "Floridablanca, Santander",
+        "Girón, Santander",
+        "Piedecuesta, Santander"
+      ]
+    }
+  },
+  "categorias": [
+    "clínica estética",
+    "clínica odontológica",
+    "dermatólogo",
+    "cirujano plástico",
+    "spa",
+    "veterinaria",
+    "barbería",
+    "salón de belleza",
+    "gimnasio",
+    "inmobiliaria",
+    "concesionario de motos",
+    "concesionario de carros",
+    "hotel boutique",
+    "hostal",
+    "academia de idiomas",
+    "escuela de conducción",
+    "agencia de viajes",
+    "óptica",
+    "centro de estética",
+    "estudio webcam",
+    "agencia de modelos",
+    "restaurante"
+  ],
+  "supabase_url": "",
+  "supabase_anon_key": ""
+}

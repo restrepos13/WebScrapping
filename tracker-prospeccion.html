@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tracker de Prospección</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=Spline+Sans+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#F6F6F3;--card:#FFF;--ink:#171713;--ink2:#4E4E46;--ink3:#8B8B80;--line:#E2E2DA;
+  --accent:#B45309;--accent-soft:#FBF1E5;
+  --pend:#8B8B80;--t:#B45309;--resp:#0E5FA3;--demo:#6B21A8;--cli:#1E6B45;--desc:#9CA3AF;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Archivo",system-ui,sans-serif;font-size:14px;line-height:1.5;padding-inline:clamp(12px,3vw,32px);padding-block:0 60px}
+.wrap{max-width:1160px;margin:0 auto}
+header{padding-block:26px 14px;display:flex;flex-wrap:wrap;gap:14px;align-items:baseline;justify-content:space-between;border-bottom:2px solid var(--ink)}
+h1{font-size:clamp(22px,4vw,32px);font-weight:900;font-stretch:112%;letter-spacing:-.02em;margin:0}
+.mono{font-family:"Spline Sans Mono",ui-monospace,monospace}
+.counts{display:flex;flex-wrap:wrap;gap:8px}
+.count{font-family:"Spline Sans Mono",ui-monospace,monospace;font-size:11px;font-weight:600;padding:4px 9px;background:var(--card);border:1px solid var(--line);cursor:pointer;user-select:none}
+.count b{font-size:12px}
+.count.active{border-color:var(--accent);color:var(--accent)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;padding-block:14px;align-items:center}
+select,input[type=search],textarea{font-family:inherit;font-size:13px;color:var(--ink);background:var(--card);border:1px solid var(--line);padding:7px 10px;border-radius:0}
+input[type=search]{flex:1;min-width:160px}
+select:focus,input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.toolbar .right{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+button{font-family:"Spline Sans Mono",ui-monospace,monospace;font-size:11px;font-weight:600;letter-spacing:.04em;background:var(--card);border:1px solid var(--line);color:var(--ink2);padding:7px 10px;cursor:pointer}
+button:hover{border-color:var(--ink3)}
+button.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+.hint{font-size:12px;color:var(--ink3);margin:4px 0 0}
+
+.row{background:var(--card);border:1px solid var(--line);margin-top:10px;padding:14px 16px;display:grid;grid-template-columns:minmax(210px,1.25fr) minmax(180px,1fr) minmax(220px,1.4fr) auto;gap:8px 18px;align-items:start}
+.row.desc-state{opacity:.55}
+.rname{font-weight:800;font-size:15px;font-stretch:106%;letter-spacing:-.01em}
+.rmeta{font-size:12px;color:var(--ink3);margin-top:2px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.chip{font-family:"Spline Sans Mono",ui-monospace,monospace;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border:1px solid var(--line);color:var(--ink2)}
+.chip.p1{border-color:var(--accent);color:var(--accent)}
+.contact{font-family:"Spline Sans Mono",ui-monospace,monospace;font-size:12px;overflow-wrap:anywhere}
+.contact a{color:var(--ink);text-decoration-color:var(--ink3)}
+.contact .lbl{color:var(--ink3);font-size:10px;text-transform:uppercase;letter-spacing:.06em}
+.gancho{font-size:12.5px;color:var(--ink2)}
+.gancho b{color:var(--ink)}
+.state-col{display:flex;flex-direction:column;gap:7px;min-width:190px}
+.estado{font-family:"Spline Sans Mono",ui-monospace,monospace;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;display:inline-block;width:max-content}
+.st-pend{color:var(--pend);background:#EFEFEA}
+.st-t1,.st-t2,.st-t3{color:var(--t);background:var(--accent-soft)}
+.st-resp{color:var(--resp);background:#E8F1F9}
+.st-demo{color:var(--demo);background:#F2EAF9}
+.st-neg{color:var(--demo);background:#F2EAF9}
+.st-cli{color:var(--cli);background:#E7F2EC}
+.st-desc{color:var(--desc);background:#F0F1F3}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.acts button{padding:5px 8px;font-size:10px}
+.fecha{font-size:11px;color:var(--ink3)}
+.notas{width:100%;min-height:34px;resize:vertical;font-size:12px}
+.empty{padding:40px;text-align:center;color:var(--ink3)}
+footer{margin-top:30px;font-size:12px;color:var(--ink3);border-top:1px solid var(--line);padding-top:14px;max-width:80ch}
+@media (max-width:860px){.row{grid-template-columns:1fr 1fr}.state-col{grid-column:1/-1}}
+@media (max-width:560px){.row{grid-template-columns:1fr}}
+#storagewarn{display:none;background:#FFF6E8;border-left:3px solid #8A5A00;padding:10px 14px;font-size:12.5px;margin-top:12px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;padding-top:14px}
+.tab{font-family:"Spline Sans Mono",ui-monospace,monospace;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:8px 14px;background:var(--card);border:1px solid var(--line);color:var(--ink2);cursor:pointer}
+.tab.active{background:var(--ink);border-color:var(--ink);color:#fff}
+.msgbox{grid-column:1/-1;border-top:1px dashed var(--line);padding-top:10px}
+.msgbox summary{cursor:pointer;font-family:"Spline Sans Mono",ui-monospace,monospace;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);user-select:none}
+.msgtext{background:#EAF5F0;border-left:3px solid #0B6E4F;padding:12px 14px;font-size:13px;margin-top:8px;border-radius:0 10px 10px 10px;white-space:pre-wrap}
+.msgbtns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.msgbtns button.copied{border-color:#0B6E4F;color:#0B6E4F}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>Tracker de Prospección <a href="mapa.html" style="font-size:13px;font-weight:600;color:var(--accent);text-decoration:none;vertical-align:middle;margin-left:8px;font-family:'Spline Sans Mono',monospace">MAPA ↗</a> <a href="index.html" style="font-size:13px;font-weight:600;color:var(--ink-3);text-decoration:none;vertical-align:middle;margin-left:6px;font-family:'Spline Sans Mono',monospace">INICIO</a></h1>
+    <p class="hint"><span id="total"></span> prospectos de los 4 radares · el progreso se guarda en este navegador · hacé respaldo JSON seguido</p>
+  </div>
+  <div class="counts" id="counts"></div>
+</header>
+<div id="storagewarn">Este navegador no está guardando datos (modo incógnito o almacenamiento bloqueado). Podés usar el tracker, pero exportá el JSON antes de cerrar o se pierde el progreso.</div>
+
+<div class="tabs" id="tabs">
+  <button class="tab active" data-s="">Todos</button>
+  <button class="tab" data-s="Webcam">Agencias webcam</button>
+  <button class="tab" data-s="OnlyFans">Chatters (OnlyFans)</button>
+  <button class="tab" data-s="Clínicas">Clínicas</button>
+  <button class="tab" data-s="Hoteles">Hoteles</button>
+</div>
+<div class="toolbar">
+  <select id="f-prio" title="Filtrar por prioridad">
+    <option value="">Toda prioridad</option><option>P1</option><option>P2</option><option>P3</option>
+  </select>
+  <select id="f-estado" title="Filtrar por estado">
+    <option value="">Todo estado</option>
+    <option value="pend">Sin contactar</option><option value="t1">Toque 1</option><option value="t2">Toque 2</option><option value="t3">Toque 3</option>
+    <option value="resp">Respondió</option><option value="demo">Demo</option><option value="neg">Negociando</option><option value="cli">Cliente</option><option value="desc">Descartado</option>
+  </select>
+  <input type="search" id="f-q" placeholder="Buscar por nombre, ciudad, contacto…">
+  <div class="right">
+    <button id="btn-export" class="primary">Respaldo JSON</button>
+    <button id="btn-import">Importar JSON</button>
+    <button id="btn-csv">Exportar CSV (Excel)</button>
+    <input type="file" id="file-import" accept="application/json" hidden>
+  </div>
+</div>
+
+<div id="list"></div>
+<div class="empty" id="empty" hidden>Nada con esos filtros.</div>
+
+<footer>
+  <p><b>Flujo:</b> "Registrar toque" avanza Sin contactar → Toque 1 → 2 → 3 y guarda la fecha (recordá: toque 2 a las 72h, toque 3 al día 7, después pausa de 60 días). Cuando contesten, marcá Respondió → Demo → Negociando → Cliente. Los enlaces WA abren el chat directo. El CSV abre en Excel con todo el estado incluido.</p>
+</footer>
+</div>
+
+<script src="sync.js"></script>
+<script>
+"use strict";
+// ===== Catálogo (radares sept 2026). w = WhatsApp solo dígitos, m = correo, x = canal alterno =====
+const P = [
+// --- WEBCAM MEDELLÍN ---
+{id:"aj",n:"AJ Studios / MY Studios",s:"Webcam",c:"Medellín / Bello",t:"Alto",p:"P1",w:"573106232033",m:"vinculacion@novaredsolutions.com",g:"Pagan 'Monitoreo en Sede'; correo placeholder Wix en MY Studios"},
+{id:"olympus",n:"Producciones Olympus",s:"Webcam",c:"Laureles, Medellín",t:"Alto",p:"P1",w:"573041273001",m:"rrss@produccionesolympus.com",g:"Invierten en SEO/blog pero cierran leads por WA manual"},
+{id:"playhouse",n:"PlayHouse Agency",s:"Webcam",c:"Laureles, Medellín",t:"Medio",p:"P3",w:"573158792060",m:"",g:"Contador '0+' roto en su web; seguimiento manual"},
+{id:"imperium",n:"Imperium Studios",s:"Webcam",c:"La Floresta, Medellín",t:"Medio",p:"P2",w:"573052994196",m:"info@imperiumstudios.com.co",g:"100+ modelos activas, captación 100% WA manual"},
+{id:"diamante",n:"Diamante Webcam (DWC)",s:"Webcam",c:"Medellín",t:"Medio",p:"P3",w:"573023174446",m:"",g:"8 años operando, web anticuada sin funnel"},
+{id:"xtasy",n:"Xtasy Studio",s:"Webcam",c:"Guayabal, Medellín",t:"Medio",p:"P3",w:"573174553236",m:"ceo@globalgrupjaag.com",g:"S.A.S. formal con correo Gmail y 2 líneas WA manuales"},
+{id:"monroe",n:"Monroe (Monro3)",s:"Webcam",c:"Medellín",t:"Emergente",p:"P3",w:"573147891172",m:"mandragroup3@gmail.com",g:"Boutique cuidado, correo Gmail, WA manual"},
+{id:"onlyyou",n:"Only You Studios",s:"Webcam",c:"Medellín",t:"Emergente",p:"P3",w:"573009783030",m:"",g:"Venden 'monitoreo' como diferencial = monitores humanos"},
+{id:"beat",n:"Beat Studios",s:"Webcam",c:"Itagüí",t:"Emergente",p:"P3",w:"573205998956",m:"contacto@beatstudios.co",g:"Invierten en SEO, redes casi inexistentes, funnel WA manual"},
+{id:"hoku",n:"Hoku Studios",s:"Webcam",c:"Itagüí",t:"Medio",p:"P2",w:"573053961530",m:"",g:"Formulario de reclutamiento roto (reCAPTCHA)"},
+{id:"rooms",n:"Rooms Company",s:"Webcam",c:"Medellín",t:"Medio",p:"P2",w:"",m:"",x:"Sin contacto: web caída (SSL de otro dominio). Buscar IG/Maps",g:"Se anuncian con 4 sedes y la web está muerta"},
+// --- WEBCAM PEREIRA ---
+{id:"redangel",n:"RedAngelStudio",s:"Webcam",c:"Centro, Pereira",t:"Medio",p:"P1",w:"573165666665",m:"",x:"Alterno 3209978381 · Linktree/Setmore",g:"Web caída (DNS) operando por Linktree; TikTok ~8K"},
+{id:"models1a",n:"Models1A",s:"Webcam",c:"Álamos, Pereira +3 ciudades",t:"Alto",p:"P1",w:"573009135094",m:"contacto@models1a.com",g:"8 sedes, 1 sola línea con horario de oficina"},
+{id:"cm",n:"CM Studios",s:"Webcam",c:"Pinares, Pereira",t:"Alto",p:"P2",w:"573174270323",m:"Ceo@cmstudios.com",g:"El más premiado (YNOT/LALEXPO) sin automatización"},
+{id:"tavera",n:"Tavera Studios",s:"Webcam",c:"Pereira +Ibagué+Girardot",t:"Alto",p:"P2",w:"573203166730",m:"",g:"Multi-sede, 18+ plataformas, sin formulario siquiera"},
+{id:"omp",n:"Online Models Pro",s:"Webcam",c:"Pereira",t:"Medio",p:"P3",w:"573208696433",m:"contacto@onlinemodelspro.com",g:"Premio Eje Cafetero; reclutamiento WA manual"},
+{id:"lizz",n:"Lizz Models",s:"Webcam",c:"Corales + Dosquebradas",t:"Medio",p:"P3",w:"573242838092",m:"lizzmodels14@gmail.com",g:"2 sedes sin sistema central; Gmail + Wix"},
+{id:"chestudios",n:"Chestudios",s:"Webcam",c:"Pereira",t:"Medio",p:"P3",w:"573004431077",m:"contacto@chestudios.com.co",x:"Datos de directorio: verificar",g:"Contacto de terceros, confirmar canal primero"},
+{id:"zen",n:"Zen Studio",s:"Webcam",c:"Circunvalar, Pereira",t:"Emergente",p:"P3",w:"573215117125",m:"zenstudiocol@gmail.com",g:"Enfoque audiovisual premium, reclutamiento WA manual"},
+{id:"angels",n:"Angel's Agency",s:"Webcam",c:"Pereira",t:"Emergente",p:"P3",w:"573016252349",m:"contacto@angelswebcammodels.com",g:"Pagan web a terceros = compran software; quieren cadena"},
+{id:"mulier",n:"Mulier Group",s:"Webcam",c:"Pereira",t:"Emergente",p:"P2",w:"573225008469",m:"groupmulier@gmail.com",g:"Web casi rota: campos vacíos, fotos sin cargar"},
+{id:"innovation",n:"Innovation Models",s:"Webcam",c:"Centro, Pereira",t:"Emergente",p:"P3",w:"573234168027",m:"info@innovationmodelspereira.com.co",g:"Dominio viejo muerto indexado + web débil"},
+{id:"queens",n:"Queens Studio",s:"Webcam",c:"Pereira/Dosquebradas",t:"Emergente",p:"P2",w:"",m:"",x:"Sin contacto: web caída. Abordar por TikTok",g:"Web caída con operación viva en redes"},
+{id:"gz",n:"GZ Studios",s:"Webcam",c:"Dosquebradas",t:"Emergente",p:"P2",w:"",m:"",x:"Sin contacto: DNS muerto. Buscar redes",g:"5+ años y dominio muerto"},
+// --- ONLYFANS ---
+{id:"velvet",n:"Velvet for Women",s:"OnlyFans",c:"LATAM / Medellín",t:"Alta",p:"P1",w:"12024686055",m:"Hello@velvetforwomen.com",g:"Contratan Chat Sellers USD600+/mes; ROI con sus números"},
+{id:"agenciaofm",n:"AgenciaOFM",s:"OnlyFans",c:"Medellín",t:"Alta",p:"P1",w:"573209286998",m:"info@agenciaofm.co",g:"La más contactable: fijo 604 + correo corporativo; 50+ creadoras"},
+{id:"onlytop",n:"OnlyTop",s:"OnlyFans",c:"Medellín",t:"Media",p:"P1",w:"",m:"",x:"Formulario onlytop.co (responden WA <24h)",g:"Publican 'chatters bilingües' como servicio central"},
+{id:"starfans",n:"StarFans",s:"OnlyFans",c:"Colombia",t:"Alta",p:"P2",w:"",m:"",x:"Formulario agencia-onlyfans.co · IG @starfans.official",g:"124+ creadoras declaradas, chateo profesional humano"},
+{id:"oflatam",n:"OnlyFans Agencia LATAM",s:"OnlyFans",c:"Remota (MDE/BOG)",t:"Alta",p:"P2",w:"",m:"",x:"Formulario onlyfans-agencia.com",g:"Declaran 2350+ creadoras y soporte 24/7 humano"},
+{id:"onlymodelos",n:"Only Modelos",s:"OnlyFans",c:"Pereira / nacional",t:"Media",p:"P3",w:"573150493988",m:"",g:"Filtran 12-20 fotos por aspirante a mano"},
+{id:"viralof",n:"Agencia OnlyFans (agenciaviralof)",s:"OnlyFans",c:"Madrid + Bogotá",t:"Media",p:"P3",w:"34623917329",m:"info@agenciaonlyfans.es",g:"Chatters Team Lead propio, 6 países"},
+{id:"mktmodelos",n:"Marketing para Modelos",s:"OnlyFans",c:"Remota (Pereira/Manizales)",t:"Media",p:"P3",w:"",m:"hola@marketingparamodelos.com",x:"Telegram @encastellano69",g:"Boutique unipersonal: pitch de alianza/reventa"},
+{id:"empiremx",n:"Empire Management MX",s:"OnlyFans",c:"CDMX (opera Colombia)",t:"Alta",p:"P2",w:"525521956736",m:"",g:"'Panther Chat' humano en 6 idiomas; 60+ creadoras"},
+{id:"goodbunny",n:"Good Bunny Agency",s:"OnlyFans",c:"Internacional",t:"Alta",p:"P1",w:"",m:"",x:"DM IG @recruitment.gb",g:"Vacantes de chatters hispanos USD300-1000 + training pago"},
+{id:"bravegirls",n:"BraveGirls Agency",s:"OnlyFans",c:"Delaware, USA",t:"Media",p:"P1",w:"",m:"contacto@bravegirlsagency.com",g:"Chatters LATAM USD400-1200 +15%; su tabla salarial = tu ROI"},
+{id:"topchatters",n:"Top Chatters OF",s:"OnlyFans",c:"España",t:"Media",p:"P3",w:"19176755303",m:"info@topchatterof.com",g:"Agencia de chatting puro (20-30%): pitch white-label"},
+{id:"dma",n:"DMA",s:"OnlyFans",c:"Medellín",t:"Emergente",p:"P2",w:"",m:"",x:"LinkedIn de Eleonora Tamayo (gerente)",g:"USD87K/mes una modelo; cero presencia digital propia"},
+{id:"conejitas",n:"Only Conejitas",s:"OnlyFans",c:"Medellín",t:"Emergente",p:"P2",w:"",m:"",x:"Buscar IG activo (web caída)",g:"Rankean en Google con el dominio muerto"},
+{id:"elite",n:"\"Elite\"",s:"OnlyFans",c:"Medellín",t:"Emergente",p:"P3",w:"",m:"",x:"Rastrear perfil de empresa en Magneto365",g:"Pagaban chatters en USD (vacante cerrada)"},
+{id:"mca",n:"Management Creators Agency",s:"OnlyFans",c:"Medellín",t:"Emergente",p:"P3",w:"",m:"",x:"Perfil en klimbup.com",g:"Reclutan por terceros, sin web propia"},
+{id:"cca",n:"@content_creator_agency",s:"OnlyFans",c:"Medellín",t:"Emergente",p:"P3",w:"",m:"",x:"DM de Instagram",g:"Captan 100% por DM; sin web"},
+{id:"onprivate",n:"On Private Studio",s:"OnlyFans",c:"Cali",t:"Alta",p:"P2",w:"573156790309",m:"info@onprivatestudio.com",g:"Reclutan 'monitoras' en su web; 12 años; sin OF"},
+{id:"dmuniversal",n:"DM Universal",s:"OnlyFans",c:"Bucaramanga",t:"Alta",p:"P2",w:"573213474704",m:"dmuniversalweb@gmail.com",g:"140+ modelos, monitoreo 24/7 humano, Gmail"},
+{id:"mayorca",n:"Mayorca Studios",s:"OnlyFans",c:"Cúcuta",t:"Media",p:"P3",w:"573006497675",m:"",g:"Líder local sin redes, correo ni OF"},
+{id:"prisma",n:"Prisma Agencia",s:"OnlyFans",c:"Bucaramanga",t:"Emergente",p:"P3",w:"573506932776",m:"prismaconvocatorias@gmail.com",g:"Atienden L-V 8-6: bot 24/7 pitch directo"},
+{id:"workline",n:"Workline Studios",s:"OnlyFans",c:"Bucaramanga",t:"Emergente",p:"P3",w:"573169541000",m:"",g:"Todo por WA y entrevista presencial, sin filtro"},
+{id:"glam",n:"Glam Studios",s:"OnlyFans",c:"Barranquilla",t:"Emergente",p:"P3",w:"",m:"",x:"WA vía wa.link/b4drg8",g:"Insinúan OF ('plataformas complementarias'); web sin conversión"},
+{id:"love2cam",n:"Love2Cam Studio",s:"OnlyFans",c:"Cúcuta",t:"Emergente",p:"P3",w:"573174407706",m:"",g:"'Coordinadora atiende personalmente' = cuello de botella"},
+// --- CLÍNICAS ---
+{id:"dentioral",n:"DentiOral",s:"Clínicas",c:"Belén + Almacentro",t:"Alta",p:"P1",w:"573174414669",m:"",g:"Botón 'Agenda Online' que no agenda; pacientes de EE.UU."},
+{id:"centrosthetic",n:"CentroSthetic",s:"Clínicas",c:"Astorga, El Poblado",t:"Media",p:"P1",w:"573164784757",m:"administración@centrosthetic.com.co",g:"'Agenda en línea' falso + TripAdvisor sin inglés"},
+{id:"cliniq",n:"Cliniq",s:"Clínicas",c:"Laureles",t:"Media",p:"P1",w:"573124732098",m:"servicioalcliente@cliniq.co",g:"Página MedTravel entera gestionada a mano"},
+{id:"bocasyrisas",n:"Bocas & Risas",s:"Clínicas",c:"Prado Centro",t:"Alta",p:"P1",w:"573013248706",m:"",g:"30 años, 5.0 Google (186 reseñas), web vieja, internacionales"},
+{id:"antienv",n:"Clínica Antienvejecimiento",s:"Clínicas",c:"El Poblado",t:"Media",p:"P2",w:"573235122296",m:"",g:"Redes rotas, sin correo, sin inglés en zona premium"},
+{id:"bedharma",n:"Be Dharma",s:"Clínicas",c:"Oviedo, El Poblado",t:"Media",p:"P2",w:"573212265964",m:"clinicabedharma@gmail.com",g:"10+ años internacionales; Gmail; 1 línea para todo"},
+{id:"mp",n:"MP Medical (Dra. Mónica Pineda)",s:"Clínicas",c:"Milla de Oro",t:"Media",p:"P2",w:"573042586294",m:"",g:"2 WA cruzados; recompra botox sin recordatorios"},
+{id:"mojica",n:"Dr. Andrés Mojica",s:"Clínicas",c:"Salud Vegas, El Poblado",t:"Media",p:"P2",w:"573244372396",m:"",g:"'Fly in for surgery' sin CRM ni pipeline"},
+{id:"odontoesp",n:"Odontoespecialistas",s:"Clínicas",c:"Sandiego",t:"Media",p:"P3",w:"573137591236",m:"",g:"Valoración gratis sin filtro = recepción quemada"},
+{id:"artica",n:"Clínica Ártica",s:"Clínicas",c:"Villa Carlota",t:"Media",p:"P3",w:"573216423818",m:"info@clinicaartica.com",g:"No-shows sin confirmación automática"},
+{id:"meryalvarez",n:"Clínica Mery Álvarez",s:"Clínicas",c:"4 sedes",t:"Alta",p:"P3",w:"573163433000",m:"",g:"4 sedes, 20.000 pacientes, 1 línea de WA"},
+{id:"dermapau",n:"Clínica DermaPau",s:"Clínicas",c:"El Tesoro",t:"Emergente",p:"P3",w:"573218799365",m:"servicioalcliente@dermapau.com",g:"El Tesoro sin inglés; multisesión sin recordatorios"},
+{id:"mia",n:"MIA Dermatología",s:"Clínicas",c:"Ciudad del Río",t:"Emergente",p:"P3",w:"573137844761",m:"",g:"/citas/ que es formulario, no agendador; 2 líneas"},
+{id:"nathalie",n:"Dra. Nathalie Morales",s:"Clínicas",c:"Ciudad del Río",t:"Emergente",p:"P2",w:"573053901990",m:"nathaliemoralesderma@hotmail.com",g:"Hotmail + WA sin responder mientras consulta"},
+{id:"medicalskin",n:"Medical Skin",s:"Clínicas",c:"Salud Vegas",t:"Emergente",p:"P3",w:"573007255905",m:"",g:"Pacientes de NY por reputación, sin inglés ni correo"},
+{id:"ortoclin",n:"Ortoclin",s:"Clínicas",c:"Medellín",t:"Emergente",p:"P2",w:"573233083681",m:"",g:"Turismo dental con un solo WA manual"},
+{id:"dulcefigura",n:"Dulce Figura Spa",s:"Clínicas",c:"Laureles",t:"Emergente",p:"P3",w:"573015290097",m:"",g:"Paquetes de 10 sesiones coordinados a mano"},
+{id:"evoself",n:"Evo-Self Clinic",s:"Clínicas",c:"Mall Interplaza",t:"Media",p:"P2",w:"",m:"",x:"Buscar WA por Maps/IG",g:"Certificado SSL vencido: error de seguridad visible"},
+// --- HOTELES ---
+{id:"oasis",n:"Oasis Tolú Hotel Boutique",s:"Hoteles",c:"Tolú",t:"Media",p:"P1",w:"573502381816",m:"",g:"9.8 en Booking sin web propia: 100% comisiones OTA"},
+{id:"casajaguar",n:"Casa Jaguar",s:"Hoteles",c:"Getsemaní, Cartagena",t:"Media",p:"P1",w:"573004254884",m:"info@casajaguarcartagena.com",g:"Reservan por el WA personal de la gerente (María)"},
+{id:"edmar",n:"Hotel Edmar",s:"Hoteles",c:"Rodadero, Santa Marta",t:"Media",p:"P1",w:"573157238130",m:"ventas@hoteledmarsantamarta.com",g:"50 años, mediano, sin inglés; ofrecer licencia con código"},
+{id:"tucan",n:"Cabañas Tucán",s:"Hoteles",c:"Capurganá",t:"Media",p:"P1",w:"573156346434",m:"",g:"'Cuando no hay señal, el hotel está cerrado' (Alicia y Marco)"},
+{id:"selvaminca",n:"Selva Minca",s:"Hoteles",c:"Minca",t:"Alta",p:"P2",w:"573145386652",m:"info@selvaminca.com",g:"37K seguidores desbordan 12 unidades; motor Cloudbeds"},
+{id:"makao",n:"Makao Beach Hotel",s:"Hoteles",c:"Palomino",t:"Alta",p:"P3",w:"",m:"makaopalomino@gmail.com",x:"WA vía wa.link/8yl0pk",g:"27K seguidores, Gmail: marca creció más que la operación"},
+{id:"yachay",n:"Eco Hotel Yachay Tayrona",s:"Hoteles",c:"Parque Tayrona",t:"Alta",p:"P2",w:"573186482509",m:"info@hotelparquetayrona.com",g:"3 números + FAQ del parque + dependencia OTA visible"},
+{id:"coliseo",n:"Casa del Coliseo",s:"Hoteles",c:"Centro, Cartagena",t:"Alta",p:"P3",w:"573137421720",m:"",g:"Empujan reserva directa (-15%) sin bot que la cierre"},
+{id:"casacarolina",n:"Casa Carolina",s:"Hoteles",c:"Centro, Santa Marta",t:"Alta",p:"P3",w:"573205199288",m:"",g:"Travellers' Choice + motor LobbyPMS; falta el puente WA→motor"},
+{id:"placita",n:"Placita Vieja",s:"Hoteles",c:"Santa Marta",t:"Media",p:"P2",w:"573057505671",m:"ventas@placitavieja.com",g:"8 habitaciones con 2 WhatsApps"},
+{id:"utta",n:"Ranchería Utta",s:"Hoteles",c:"Cabo de la Vela",t:"Media",p:"P3",w:"573138178076",m:"uttarancheria@gmail.com",g:"Confirmación manual sin conectividad; 13K seguidores"},
+{id:"cocoplum",n:"Hotel Cocoplum Beach",s:"Hoteles",c:"San Andrés",t:"Alta",p:"P3",w:"573174407282",m:"Informes@cocoplumhotel.com",g:"44 hab. sin automatización; ofrecer licencia con código"},
+{id:"casacolonial",n:"Hotel Casa Colonial",s:"Hoteles",c:"El Prado, Barranquilla",t:"Media",p:"P2",w:"573023982391",m:"hotelcasacolonial@hotmail.es",g:"9.3 Booking, Hotmail, sin motor ni inglés"},
+{id:"mamallena",n:"Mamallena Beachside",s:"Hoteles",c:"Rincón del Mar",t:"Media",p:"P2",w:"573046589029",m:"beachside@mamallena.com",g:"Web invisible para Google; comisiones Hostelworld/Booking"},
+{id:"nuba",n:"Nuba Boutique Hostel",s:"Hoteles",c:"Palomino",t:"Emergente",p:"P2",w:"",m:"",x:"DM IG o chat de Booking",g:"#1 TripAdvisor Palomino sin web propia"},
+{id:"bluesea",n:"Hostel Blue Sea",s:"Hoteles",c:"Rincón del Mar",t:"Media",p:"P3",w:"",m:"",x:"facebook.com/bluesearincondelmar",g:"31 hab. solo con Facebook + Booking"},
+];
+
+// ===== Mensajes de primer contacto (playbook sept 2026). Reemplazar [MARCA], [NOMBRE], [TU NÚMERO] =====
+const M={
+aj:`Hola, ¿me hace un favor? Necesito llegar al dueño de AJ Studios y sé que este es el canal oficial. Les escribo porque vi dos cosas puntuales: la web de MY Studios todavía muestra el correo de plantilla de Wix ("info@misitio.com") — llevan tiempo perdiendo correos de aspirantes ahí — y el rol de Monitoreo en Sede que publican es justo lo que nosotros potenciamos con IA para que cada monitora rinda por tres. Somos [MARCA], desarrolladores colombianos; trabajamos por suscripción mensual y las condiciones las armamos con cada estudio. ¿Me comparte el contacto de la persona dueña o le reenvía este mensaje? Le muestro todo funcionando en 10 minutos.`,
+olympus:`Hola, felicitaciones por el blog de Olympus — la guía 2026 de estudios está rankeando durísimo. Justo por eso les escribo: están invirtiendo bien en atraer aspirantes, pero cada lead que llega de ese SEO cae a un WhatsApp atendido a mano, y de noche o en fin de semana se enfría. Somos [MARCA], desarrollamos IA conversacional para estudios webcam: responde al instante, califica a la aspirante y agenda la entrevista sola. Suscripción mensual, condiciones negociables. ¿Con quién de la gerencia puedo hablar 10 minutos, o me regala su contacto?`,
+playhouse:`Hola, les escribo por algo que vi en yosoyplayhouse.com: el contador de modelos formadas está mostrando "0+" — un detalle técnico menor, pero está en la página que ven todas las aspirantes. Nosotros somos [MARCA], desarrolladores colombianos: arreglamos ese tipo de cosas y, más importante, montamos IA que responde el WhatsApp del estudio 24/7 para que ninguna aspirante se enfríe esperando. Todo por suscripción, sin inversión inicial grande y con condiciones que armamos juntos. ¿Me puede compartir el contacto del dueño o reenviarle esto? Gracias.`,
+imperium:`Hola, una pregunta directa: con más de 100 modelos activas como manejan ustedes, ¿cuántos mensajes de aspirantes y modelos entran por este WhatsApp al día? Lo pregunto porque somos [MARCA], desarrolladores de IA conversacional para estudios, y con ese volumen un asistente que responda, filtre y agende solo les cambia la operación. Es por suscripción mensual y las condiciones las negociamos para que funcione para ambos. ¿Quién es la persona indicada de la gerencia para mostrarle una demo de 10 minutos? Si me comparte su contacto, yo me encargo del resto.`,
+diamante:`Hola, llevan desde 2018 operando — 8 años en esta industria es señal de que hacen las cosas bien. Les escribo porque su web ya no está a la altura del estudio: los estudios nuevos de Medellín están captando aspirantes con páginas más agresivas y formularios online, y ustedes tienen la trayectoria pero no la vitrina. Somos [MARCA], desarrolladores colombianos: web nueva + asistente de WhatsApp con IA, por suscripción mensual negociable. ¿Me regala el contacto del dueño para mostrarle en 10 minutos cómo se vería? O si le reenvía esto, igual me sirve. Gracias.`,
+xtasy:`Hola, vi que Xtasy opera formalmente como Global Group JAAG S.A.S. — eso los pone por encima de la mayoría del sector. Lo que no cuadra con esa formalidad: el correo principal del estudio es un Gmail y tienen dos líneas de WhatsApp atendidas a mano, donde seguro se cruzan aspirantes. Somos [MARCA]: unificamos esas líneas en un solo sistema con IA que responde y agenda 24/7, por suscripción negociable. Escribo también a ceo@globalgrupjaag.com, pero si me comparte directo el número de gerencia, en 10 minutos le muestro la demo.`,
+monroe:`Hola, su web monro3.com está muy bien cuidada — se nota un estudio boutique con criterio. Les escribo por lo que viene después del formulario: hoy cada aspirante que aplica queda esperando a que un humano conteste este WhatsApp. Somos [MARCA], desarrolladores colombianos de IA conversacional: la aspirante recibe respuesta al segundo, a cualquier hora, y llega a ustedes ya filtrada y agendada. Suscripción mensual, condiciones a la medida de un estudio de su tamaño. ¿Me comparte el contacto de la persona dueña o le reenvía este mensaje?`,
+onlyyou:`Hola, vi que en onlyyoustudios.co destacan el monitoreo como su diferencial — y tienen razón: es lo que más valoran las modelos. Justo ahí trabajamos nosotros: somos [MARCA] y desarrollamos IA que multiplica a un equipo de monitoreo, respondiendo chats y aspirantes 24/7 sin agrandar la nómina. Por suscripción mensual y con condiciones que armamos juntos, sin inversión inicial pesada. ¿Quién es el dueño del estudio y cómo le hago llegar una demo de 10 minutos? Si me pasa su contacto o le reenvía esto, quedo atento.`,
+beat:`Hola, leí el artículo de su blog de los 3 mejores estudios de Medellín — bien jugado ese SEO. Ahora, todo ese tráfico que están generando termina en un botón de WhatsApp atendido a mano, y casi no tienen presencia en redes que lo respalde. Somos [MARCA], desarrolladores colombianos: IA que responde y agenda las entrevistas que su SEO ya genera, por suscripción negociable. ¿Me comparte el contacto del dueño o le reenvía esto? En 10 minutos le muestro cuántas entrevistas se les están escapando de noche.`,
+hoku:`Hola, les escribo por algo urgente que quizás no saben: el formulario de reclutamiento de hokustudios.com está roto — el reCAPTCHA está mal configurado y no deja enviar. Toda aspirante que intenta aplicar por la web desde hace tiempo, se pierde. Somos [MARCA], desarrolladores colombianos; ese arreglo es rápido, y de paso montamos un asistente de WhatsApp con IA para que ninguna candidata quede sin respuesta. Suscripción mensual, condiciones negociables. ¿Me regala el contacto del dueño? Esto le interesa saberlo hoy.`,
+rooms:`(Primero conseguir canal por IG/Maps.) Hola, ¿siguen operando Rooms Company? Su web roomscompany.com está caída con un error de seguridad, y se siguen anunciando con 4 sedes en Medellín — cada aspirante que los googlea encuentra ese error. Somos [MARCA], desarrolladores colombianos: web nueva + asistente de WhatsApp con IA, por suscripción negociable. ¿Me comparten el contacto de la persona dueña? Le muestro en 10 minutos cómo se recupera eso.`,
+redangel:`Hola, ¿me hace un favor y le hace llegar esto al dueño de RedAngel? Es importante: redangelstudio.com está caída (falla de DNS) desde hace días, mientras el TikTok del estudio — que está buenísimo, casi 8 mil seguidores — sigue mandando gente a un Linktree. Cada día así son entrevistas que se van a otro estudio. Somos [MARCA], desarrolladores colombianos: web nueva + asistente de WhatsApp con IA que agenda entrevistas solo, por suscripción mensual sin inversión inicial grande, condiciones negociables. Puedo mostrar cómo quedaría en 10 minutos. ¿Con quién hablo?`,
+models1a:`Hola, sé que esta es la línea principal de Models1A y por eso empiezo pidiendo un favor: ¿me ayuda a hacerle llegar esto a la dirección general? El dato es simple: ustedes tienen 8 sedes en 4 ciudades y una sola línea de atención con horario de oficina. Toda aspirante que escribe un sábado en la noche — que es cuando más se decide en esta industria — encuentra silencio. Somos [MARCA], desarrolladores colombianos de IA conversacional multi-sede: cada mensaje respondido al instante, enrutado a su ciudad, 24/7. Suscripción mensual, condiciones para negociar bien entre ambos. ¿A quién le muestro la demo?`,
+cm:`Hola, ustedes son el estudio más premiado de Pereira — YNOT al mejor estudio de Latinoamérica, LALEXPO casi todos los años. Les escribo justo por eso: un estudio con ese nivel no debería atender aspirantes con un WhatsApp manual como cualquier estudio de barrio. Somos [MARCA], desarrolladores colombianos: IA conversacional que atiende, filtra y agenda con el nivel de marca que ustedes ya tienen. Suscripción mensual, condiciones negociables. Veo que publican Ceo@cmstudios.com — ¿es el canal directo del dueño o me puede compartir su contacto? 10 minutos de demo y ustedes deciden.`,
+tavera:`Hola, vi que Tavera opera Pereira, Ibagué y Girardot y trabaja con 18+ plataformas — de las operaciones más completas que he visto en el país. Lo que me llamó la atención: con todo eso, no tienen ni formulario de reclutamiento; todo entra por este número. Somos [MARCA], desarrolladores colombianos de IA conversacional multi-sede: cada aspirante respondida al instante y enrutada a su ciudad, sin depender de quién esté de turno. Suscripción negociable. ¿Me comparte el contacto del dueño o le reenvía esto? Le muestro la demo en 10 minutos.`,
+omp:`Hola, vi que ganaron el premio a mejor agencia webcam del Eje Cafetero — con 7 años en esto, merecido. Ahora una pregunta de tocayo digital: ¿cuántas aspirantes les escriben por fuera del horario en que alguien atiende este número? Somos [MARCA], desarrolladores colombianos: IA que responde ese WhatsApp 24/7 con el tono de ustedes, filtra y agenda. Por suscripción mensual, condiciones que armamos juntos. ¿Quién es la persona dueña y cómo le comparto una demo de 10 minutos?`,
+lizz:`Hola, vi que Lizz maneja dos sedes — Corales y La Pradera — desde 2019. Les escribo porque con dos sedes y un solo WhatsApp, coordinar aspirantes y modelos a mano se vuelve un cuello de botella que crece con ustedes. Somos [MARCA], desarrolladores colombianos: un sistema con IA que atiende 24/7, separa por sede y les deja todo organizado en un panel. Suscripción mensual sin inversión grande, condiciones negociables. ¿Me comparte el contacto de la persona dueña o le reenvía este mensaje? Demo de 10 minutos y deciden.`,
+chestudios:`Hola, ¿hablo con Chestudios? Los encontré buscando los estudios con presencia nacional desde Pereira y quería confirmar el canal antes de contar el motivo: somos [MARCA], desarrolladores colombianos de IA conversacional para estudios webcam — el WhatsApp del estudio respondiendo, filtrando y agendando solo, 24/7. Trabajamos por suscripción mensual y las condiciones las negociamos con cada estudio. ¿Me confirma si este es el número correcto y me comparte el contacto de la persona dueña? Le muestro la demo en 10 minutos.`,
+zen:`Hola, me gustó el enfoque de Zen — equipos Sony, portal interno propio, testimonios en video: se nota inversión en hacer las cosas distinto. Por eso me sorprendió que el reclutamiento siga siendo un botón de WhatsApp atendido a mano. Somos [MARCA], desarrolladores colombianos: IA que atiende a cada aspirante al instante, con la estética y el tono de la marca de ustedes. Suscripción mensual, condiciones negociables. ¿Me regala el contacto del dueño o le reenvía esto? 10 minutos de demo.`,
+angels:`Hola, vi que están construyendo una cadena de estudios y que su web la hizo una agencia profesional — van en serio. Les escribo por la pieza que sigue: ese formulario de la web hoy cae en gestión manual, y cuando abran la segunda sede el problema se duplica. Somos [MARCA], desarrolladores colombianos: IA + CRM que responde cada aplicación al instante y les deja la operación lista para escalar. Suscripción mensual, condiciones que negociamos bien entre ambos. ¿Con quién de los fundadores puedo hablar 10 minutos, o me comparte su contacto?`,
+mulier:`Hola, ¿me ayuda a hacerle llegar esto a la persona dueña de Mulier? Es un aviso más que una venta: su página muliergroup.com tiene secciones sin terminar y fotos que no cargan — y es lo primero que ve una aspirante que los googlea antes de decidir si escribe. Somos [MARCA], desarrolladores colombianos: web completa + asistente de WhatsApp con IA, por suscripción mensual pensada para estudios en crecimiento, condiciones negociables. En 10 minutos le muestro cómo quedaría la de ustedes. ¿Con quién hablo?`,
+innovation:`Hola, un dato técnico que les está costando aspirantes: su dominio viejo (innovationmodelspereira.com) sigue apareciendo en Google pero está muerto — la gente les hace clic y encuentra un error, y no todos llegan al dominio nuevo. Somos [MARCA], desarrolladores colombianos: arreglamos eso, y montamos IA en su WhatsApp para que ninguna candidata quede sin respuesta. Suscripción mensual, condiciones negociables. ¿Me comparte el contacto del dueño o le reenvía este mensaje? Gracias.`,
+queens:`(Abordar por TikTok/IG.) Hola, ¿siguen operando Queens Studio? Su web queensstudio.co no está cargando desde hace días, y sus redes siguen activas — cada aspirante que los busca en Google encuentra un error. Somos [MARCA], desarrolladores colombianos: web nueva + asistente de WhatsApp con IA por suscripción sin inversión grande, condiciones negociables. ¿Me comparten el contacto de la persona dueña? Le muestro en 10 minutos cómo se recupera.`,
+gz:`(Abordar por redes.) Hola, ¿GZ Studios sigue operando en Dosquebradas? Su dominio gzstudios.com.co está muerto pero siguen apareciendo en Google — aspirantes haciendo clic a un error todos los días. Somos [MARCA], desarrolladores colombianos: web nueva + asistente de WhatsApp con IA, suscripción negociable. ¿Me comparten el contacto de la persona dueña? 10 minutos de demo.`,
+velvet:`Hola, les escribo habiendo leído su careers page — el proceso de Chat Sellers con test y 6 días de training es de lo más serio que hay en LATAM. Justo por eso creo que esto le interesa a quien maneja la operación: somos [MARCA], desarrolladores colombianos de IA conversacional entrenada para venta por chat. No venimos a reemplazar su estructura sino a multiplicarla: cada seller cubriendo 3-4 cuentas con la IA de copiloto. Modelo por suscripción, condiciones negociables entre ambos. ¿Me pueden conectar con el founder o head de operaciones? 10 minutos de demo con una cuenta real.`,
+agenciaofm:`Hola, vi que AgenciaOFM es de las pocas agencias del país que da la cara con teléfono fijo de Medellín y correo corporativo — eso genera confianza y se nota que va en serio. Les escribo de [MARCA], también de acá: desarrollamos IA de venta por chat para agencias OF — responde fans 24/7 en inglés y español, con el tono de cada modelo, y ustedes escalan cuentas sin escalar nómina. Suscripción mensual, condiciones que negociamos bien entre ambos. Con 50+ creadoras, los números dan para verlo en 10 minutos. ¿Me comparte el contacto del dueño o le reenvía esto?`,
+onlytop:`Hola, vi que OnlyTop destaca chatters profesionales y bilingües como parte central del servicio — y en Medellín ese perfil bilingüe es de lo más caro y difícil de conseguir. Somos [MARCA], desarrolladores de acá: IA de venta por chat nativa en inglés y español que trabaja de copiloto de su equipo — más cuentas cubiertas, cero madrugadas. Suscripción mensual, condiciones negociables. Este formulario seguro lo lee el equipo: ¿me pueden pasar el contacto del founder para mostrarle una demo de 10 minutos con una cuenta real?`,
+starfans:`Hola, sé que este formulario es para modelos, pero no publican otro canal y el mensaje vale la pena: somos [MARCA], desarrolladores colombianos de IA para agencias OF. Con 124+ creadoras como declaran, su equipo de chateo profesional está en el techo de lo que un humano cubre por turno — nuestra IA responde fans 24/7 con el estilo de cada modelo y su equipo se concentra en las ventas grandes. Suscripción, condiciones negociables entre ambos. ¿Me conectan con el founder? Demo de 10 minutos, con gusto por acá o por Instagram.`,
+oflatam:`Hola, uso este formulario porque no publican otro canal — el mensaje es para el equipo directivo. Ustedes declaran la operación de creadoras más grande de Colombia y soporte 24/7: a esa escala, el costo de cubrir chat humano por turnos es el rubro más pesado de la nómina. Somos [MARCA], desarrolladores colombianos de IA de venta por chat: cobertura 24/7 real por una fracción de un solo turno humano, por suscripción y con condiciones negociables. ¿Quién del equipo directivo puede ver una demo de 10 minutos? Dejo WhatsApp: [TU NÚMERO].`,
+onlymodelos:`Hola, vi que en onlymodelos.com cada aspirante manda 12-20 fotos y videos que un manager revisa a mano — con volumen, eso son horas de trabajo por semana solo filtrando. Somos [MARCA], desarrolladores colombianos: montamos un sistema que recibe las aplicaciones, las organiza, pre-filtra y responde a cada aspirante al instante, más IA de chat para las cuentas activas. Suscripción mensual, condiciones negociables. ¿Me comparte el contacto de la persona dueña o le reenvía esto? Demo de 10 minutos.`,
+viralof:`Hola, vi que tienen equipo de chatters estructurado con team lead propio y operación en 6 países, incluida Bogotá. Les escribo de Colombia: somos [MARCA], desarrolladores de IA de venta por chat en español nativo — el acento y la jerga correcta para fans de LATAM y España, cosa que los bots gringos no logran. Funciona de copiloto del equipo de su team lead: más cuentas por turno, mejor respuesta nocturna. Suscripción, condiciones negociables. ¿Me pueden conectar con dirección o con el responsable del área de chat? 10 minutos de demo.`,
+mktmodelos:`Hola, leí tu artículo sobre las agencias de OnlyFans en Colombia — de lo más honesto que hay publicado sobre el nicho. Te escribo entre colegas: somos [MARCA], desarrolladores colombianos de IA de chat y CRM para este mercado. Se me ocurren dos caminos: montarte el stack para tu propia operación, o algo comercial — tú conoces el nicho por dentro y nosotros tenemos el software; una alianza donde refieras o revendas puede ser negocio para ambos. ¿Hablamos 10 minutos por Telegram o donde prefieras?`,
+empiremx:`Hola, vi su landing para Colombia y el sistema Panther Chat en 6 idiomas — de las operaciones de chat más completas de LATAM. Les escribo desde Colombia, donde reclutan: somos [MARCA], desarrolladores de IA de venta por chat multiidioma. Para una operación como Panther, la IA como primera línea (respuesta al segundo, cualquier idioma, cualquier hora) y su gente en los cierres grandes puede cambiar el margen por cuenta. Suscripción, condiciones negociables entre ambos. ¿Me conectan con dirección de operaciones? Demo de 10 minutos.`,
+goodbunny:`Hola, sé que esta cuenta es de reclutamiento — precisamente por eso escribo: vi sus vacantes de chatters hispanos (training pagado, B2-C2, pagos por Binance). Somos [MARCA], desarrolladores colombianos de IA de venta por chat: para una agencia que recluta a ese ritmo, la IA cubre el volumen base y su gente se queda con los cierres — menos rotación, menos training, más margen. Suscripción en USD, condiciones negociables. ¿Me pueden conectar con operaciones o management? Demo de 10 minutos cuando digan.`,
+bravegirls:`Hola, vi su vacante de chatters para LATAM (USD 400–1.200 + 15% en turnos de 7,5h). Hago números con ustedes: cubrir una cuenta 24/7 con esa estructura cuesta entre USD 1.200 y 3.600 al mes. Somos [MARCA], desarrolladores colombianos de IA de venta por chat en español nativo: cobertura 24/7 por una fracción de un solo turno, su equipo humano en los fans VIP. Suscripción en USD, condiciones negociables para ambos. ¿Con quién del equipo directivo puedo agendar 10 minutos de demo? Respondo por acá o por WhatsApp: [TU NÚMERO].`,
+topchatters:`Hola, ustedes cobran 20-30% por servicio de chateo — conocen mejor que nadie lo que cuesta operar chatters humanos a escala. Nosotros somos [MARCA], desarrolladores de IA de venta por chat en español, y no les escribimos para competir sino para lo contrario: un white-label. Ustedes ya tienen los clientes y la marca; nuestra IA por debajo les sube el margen de cada cuenta sin crecer nómina. ¿Le interesa a la dirección explorar 15 minutos? Los números son fáciles de mostrar.`,
+dma:`Hola Eleonora, escuché el episodio del Colombia Podcast sobre DMA — la historia de la modelo de USD 87.000 en un mes dice mucho de cómo operan. Me llamó la atención algo: con esos resultados, DMA casi no tiene presencia digital propia, y en este nicho eso es dejar reclutamiento sobre la mesa. Somos [MARCA], desarrolladores colombianos: web, CRM e IA de chat para agencias OF, por suscripción negociable. ¿Te muestro en 10 minutos cómo se vería el stack de DMA? Vos decidís si hay algo ahí.`,
+conejitas:`Hola, ¿siguen operando Only Conejitas? Lo pregunto en serio: su web onlyconejitas.com está caída, pero siguen apareciendo en Google cuando alguien busca agencia OnlyFans en Medellín — o sea que hay aspirantes haciendo clic y encontrando un error, todos los días. Somos [MARCA], desarrolladores colombianos: web nueva + IA de chat, por suscripción sin inversión inicial grande. Si me pasan el contacto de la dueña, le muestro en 10 minutos lo que está perdiendo y cómo se recupera.`,
+elite:`(Cuando aparezca el canal por Magneto365.) Hola, vi que publicaron una vacante de atención y ventas por chat de OnlyFans con pago en dólares — o sea que el chat es parte central de su operación. Somos [MARCA], desarrolladores colombianos de IA de venta por chat: cubre el volumen base 24/7 y su gente se queda con los cierres. Suscripción negociable. ¿Me comparten el contacto de la persona dueña? Demo de 10 minutos.`,
+mca:`(Cuando aparezca el canal por Klimb.) Hola, vi que gestionan creadores de contenido para plataformas como OnlyFans desde Medellín, reclutando por plataformas de terceros. Somos [MARCA], desarrolladores de acá: web propia + sistema de reclutamiento + IA de chat, por suscripción pensada para agencias en crecimiento, negociable. ¿Con quién de los fundadores puedo hablar 10 minutos?`,
+cca:`Hola, vi que manejan management de OnlyFans acá en Medellín captando por Instagram. Somos [MARCA], desarrolladores de acá: para una agencia que arranca, montamos el paquete completo — web, sistema de aplicaciones e IA que responde el chat 24/7 — por una suscripción mensual pensada para operaciones en crecimiento, negociable. Es la diferencia entre verse como cuenta de IG y verse como agencia. ¿Quién es la persona dueña? Con 10 minutos le muestro todo funcionando.`,
+onprivate:`Hola, 12 años y estructura de satélites y substudios — On Private es de las operaciones serias de Cali. Vi que reclutan monitoras en su propia web: nosotros trabajamos exactamente ahí. Somos [MARCA], desarrolladores colombianos: IA que potencia al equipo de monitoreo (cada monitora cubre el triple) y, si les interesa, el módulo para monetizar sus modelos también en OnlyFans — que hoy no ofrecen y su competencia tampoco. Suscripción negociable. ¿Me comparte el contacto de la gerencia o le reenvía esto?`,
+dmuniversal:`Hola, más de 140 modelos activas y una década operando — DM Universal es de los grandes del oriente. Una cuenta rápida: sostener monitoreo 24/7 para ese volumen es de los rubros más pesados de su nómina, y crece con cada modelo nueva. Somos [MARCA], desarrolladores colombianos: IA que multiplica a su equipo de monitoreo y deja la operación lista para sumar OnlyFans como línea nueva. Suscripción mensual, condiciones para negociar bien entre ambos. ¿Quién es la persona dueña y cómo le hago llegar una demo de 10 minutos?`,
+mayorca:`Hola, ustedes se posicionan como el estudio líder de Cúcuta y en Google se nota. Lo que no encontré: redes del estudio, correo, ni oferta de OnlyFans — y en una ciudad fronteriza con tanto talento, el primero que arme eso bien se queda con el mercado. Somos [MARCA], desarrolladores colombianos: paquete digital completo (web, redes conectadas, IA de WhatsApp y módulo OF) por suscripción negociable. ¿Me comparte el contacto del dueño o le reenvía esto? 10 minutos y le muestro cómo quedaría.`,
+prisma:`Hola, vi que Prisma atiende lunes a viernes de 8 a 6 — y las aspirantes de esta industria deciden de noche y en fin de semana. Cada mensaje que llega un sábado a las 11pm y se responde el lunes, probablemente ya se lo ganó otro estudio de Cabecera. Somos [MARCA], desarrolladores colombianos: IA que responde ese WhatsApp 24/7, filtra y deja las entrevistas agendadas para el lunes. Suscripción mensual sin inversión grande, negociable. ¿Me comparte el contacto de la persona dueña? Demo de 10 minutos.`,
+workline:`Hola, vi que en Workline todo el proceso de aspirantes es por este WhatsApp y entrevista presencial — sin formulario, sin filtro previo. Eso significa que ustedes (o quien atienda este número) responden lo mismo decenas de veces por semana. Somos [MARCA], desarrolladores colombianos: IA que hace esa primera conversación completa — requisitos, dudas, agendar la entrevista — y a ustedes les llega la candidata lista. Suscripción negociable, pensada para estudios medianos. ¿Me comparte el contacto del dueño o le reenvía esto?`,
+glam:`Hola, vi en glamstudiobq.com que además de webcam trabajan "plataformas complementarias de creación de contenido" — o sea, ya están mirando hacia OnlyFans. Nosotros llegamos justo ahí: somos [MARCA], desarrolladores colombianos, y montamos el stack completo para dar ese salto — web con funnel de aspirantes (la de ustedes hoy no tiene ni formulario), CRM e IA de chat. Suscripción mensual, condiciones negociables. ¿Con quién de los dueños puedo hablar 10 minutos, o me comparte su contacto?`,
+love2cam:`Hola, vi que en Love2Cam la coordinadora atiende personalmente a cada aspirante — ese trato cercano es un diferencial real, y también un techo: una sola persona no puede atender a todas, a toda hora. Somos [MARCA], desarrolladores colombianos: IA que responde al instante con ese mismo tono cercano y le pasa a la coordinadora solo las candidatas listas para entrevista. Suscripción sin inversión grande, negociable. ¿Me comparte el contacto de la persona dueña o le reenvía este mensaje? Demo de 10 minutos.`,
+dentioral:`Buenos días, ¿me colabora haciéndole llegar esto a la gerencia? Es algo puntual de su página web: el botón "¡Agenda tu cita Online!" de dentioral.com no agenda — lleva a la sección de ubicaciones. Cada paciente que hace clic esperando agendar, incluso los de EE.UU. que ustedes atienden, termina sin cita. Somos [MARCA], desarrolladores colombianos: hacemos que ese botón cumpla lo que promete — agendamiento real + asistente de WhatsApp bilingüe 24/7. Por suscripción mensual, condiciones negociables. En 10 minutos se lo muestro funcionando. ¿Con quién de administración puedo hablar?`,
+centrosthetic:`Buenos días, un dato puntual para la gerencia: el botón "Agenda en línea" de centrosthetic.com no agenda en línea — redirige a este WhatsApp. Y vi que tienen perfil en TripAdvisor, es decir, los encuentran turistas… que llegan a una web sin inglés y a un chat en horario de oficina. Somos [MARCA], desarrolladores colombianos: agendamiento online real + asistente bilingüe de WhatsApp 24/7, por suscripción negociable. ¿Me colabora con el contacto de la persona encargada de la administración, o le reenvía este mensaje? Demo de 10 minutos.`,
+cliniq:`Buenos días, vi la página MedTravel de Cliniq — pocos en Medellín tienen el proceso para paciente internacional tan bien presentado. La pregunta que le traigo a la gerencia es una sola: cuando ese paciente de EE.UU. o Canadá escribe a las 11 de la noche hora de Miami preguntando por una cirugía, ¿quién le responde? Somos [MARCA], desarrolladores colombianos: asistente bilingüe que responde al instante, cotiza según sus protocolos y agenda la videoconsulta — el ciclo largo de decisión de cirugía, acompañado sin huecos. Suscripción negociable. ¿Con quién de gerencia puedo hablar 10 minutos?`,
+bocasyrisas:`Buenos días, 30 años y 5.0 en Google con casi 200 reseñas — Bocas & Risas tiene una reputación que pocas clínicas del país logran. Le escribo a la gerencia por esto: esa reputación hoy aterriza en una página web de hace muchos años y un WhatsApp de horario de oficina, mientras ustedes mismos atienden pacientes internacionales. Somos [MARCA], desarrolladores colombianos: web a la altura de sus 30 años + asistente bilingüe 24/7 que agenda valoraciones solo. Suscripción mensual, condiciones negociables. ¿Me colabora con el contacto de la gerencia o le reenvía este mensaje?`,
+antienv:`Buenos días, ¿me colabora haciéndole llegar esto a la gerencia? Hice una revisión de su presencia digital y hay tres cosas que una clínica premium de El Poblado no puede permitirse: los enlaces de redes de su web están rotos (van a ninguna parte), no hay correo de contacto publicado, y no existe versión en inglés — en plena zona de turismo médico. Somos [MARCA], desarrolladores colombianos: lo corregimos todo y montamos asistente bilingüe de WhatsApp 24/7, por suscripción negociable. En 10 minutos le muestro a la gerencia el antes y el después.`,
+bedharma:`Buenos días, vi que Be Dharma lleva más de 10 años atendiendo pacientes internacionales entre estética y odontología. Dos observaciones para la gerencia: ese paciente internacional hoy escribe a un único WhatsApp que también atiende lo local — sin separar idioma ni servicio — y el correo público de la clínica es un Gmail, que en paciente extranjero resta confianza. Somos [MARCA], desarrolladores colombianos: asistente bilingüe con triage por servicio + correo corporativo, por suscripción negociable. ¿Con quién de administración hablo 10 minutos, o me comparte su contacto?`,
+mp:`Buenos días, vi el movimiento de la clínica en Instagram y TikTok — pocas de la Milla de Oro producen tanto contenido. La pregunta para la doctora o la administración: todo ese alcance llega a dos números de WhatsApp atendidos a mano; ¿cuántas valoraciones se pierden entre los dos? Somos [MARCA], desarrolladores colombianos: unificamos las líneas con un asistente bilingüe que responde, agenda y — clave en su especialidad — recuerda al paciente cuándo le toca el siguiente botox. Suscripción negociable. ¿Me colabora con el contacto de administración?`,
+mojica:`Buenos días, vi la sección "Fly in for surgery" del doctor — más de 2.000 cirugías y un proceso claro para paciente extranjero. Lo que le traigo a la administración: hoy la pre-venta y el posquirúrgico van por dos WhatsApp manuales, sin un sistema que separe al curioso, del agendado, del operado. Somos [MARCA], desarrolladores colombianos: asistente bilingüe + CRM que organiza ese pipeline completo, con seguimiento posquirúrgico automático. Suscripción negociable. ¿Con quién del equipo administrativo puedo hablar 10 minutos?`,
+odontoesp:`Buenos días, vi que ofrecen valoración sin costo — buen imán de pacientes, con un costo oculto: cada curioso que agenda y no llega ocupa un cupo de recepción y de agenda. Somos [MARCA], desarrolladores colombianos: un asistente de WhatsApp que califica al paciente antes de agendar, confirma la cita automáticamente y reduce los no-shows de esas valoraciones gratuitas. Por suscripción mensual negociable. ¿Me colabora con el contacto de la gerencia o le reenvía este mensaje? En 10 minutos lo ven funcionando.`,
+artica:`Buenos días, una pregunta para la administración de Ártica: ¿cuántas citas se les caen al mes por pacientes que no llegan? En odontología el no-show es el hueco silencioso de la facturación, y hoy ustedes agendan por correo y WhatsApp sin confirmación automática. Somos [MARCA], desarrolladores colombianos: asistente que agenda, confirma y recuerda cada cita solo, por suscripción mensual negociable — normalmente se paga con los no-shows que recupera. ¿Me comparte el contacto de la gerencia o le reenvía esto?`,
+meryalvarez:`Buenos días, ¿me colabora haciéndole llegar esto a la dirección? Con 4 sedes y más de 20.000 pacientes atendidos, me llamó la atención que todos los mensajes de la clínica entren por una sola línea de WhatsApp, sin agendamiento por sede. Somos [MARCA], desarrolladores colombianos especializados en atención multi-sede: cada paciente respondido al instante, enrutado a su sede y con recordatorio automático de cita. Suscripción mensual, condiciones negociables para una operación de su tamaño. ¿A quién de la dirección le muestro la demo de 10 minutos?`,
+dermapau:`Buenos días, vi que DermaPau está en la torre médica de El Tesoro — flujo constante de pacientes de alto perfil, incluidos extranjeros. Dos cosas que hoy los frenan: la web no tiene inglés y los tratamientos por sesiones (láser, hydrafacial) se coordinan a mano, sin recordatorios. Somos [MARCA], desarrolladores colombianos: asistente bilingüe de WhatsApp + recordatorios de sesión automáticos, por suscripción negociable. ¿Me colabora con el contacto de la doctora o de administración? Demo de 10 minutos.`,
+mia:`Buenos días, vi que MIA tiene página en inglés para pacientes extranjeros y una sección de citas en la web — pero esa sección es un formulario que alguien responde después, no un agendador. Somos [MARCA], desarrolladores colombianos: convertimos ese formulario en agendamiento real y unificamos sus dos líneas de WhatsApp con un asistente bilingüe 24/7. Suscripción mensual negociable. ¿Me colabora con el contacto de la doctora o de administración, o le reenvía este mensaje? En 10 minutos lo ven andando.`,
+nathalie:`Buenos días, un mensaje corto para la doctora: mientras usted está en consulta, este WhatsApp se queda sin responder — y ahí es cuando el paciente nuevo escribe a otro dermatólogo. Somos [MARCA], desarrolladores colombianos: un asistente que responde con su tono, en español o inglés, agenda en su calendario y le deja solo lo que necesita decisión suya. Suscripción mensual sin inversión grande, negociable. Si quien lee no es la doctora, ¿me colabora reenviándole esto? En 10 minutos se lo muestro funcionando.`,
+medicalskin:`Buenos días, leí el testimonio de su paciente que viajó desde New York — cuando los pacientes cruzan un continente por reputación, es la mejor señal que existe. Lo que falta es la estructura para recibirlos: la web no tiene inglés ni la clínica un canal formal internacional. Somos [MARCA], desarrolladores colombianos: versión en inglés + asistente bilingüe de WhatsApp que responde a ese paciente a cualquier hora. Suscripción negociable. ¿Me colabora con el contacto de la dirección o le reenvía este mensaje?`,
+ortoclin:`Buenos días, la web de Ortoclin tiene sección completa para paciente extranjero — claramente el turismo dental es su apuesta. Lo que no cierra: ese paciente internacional solo puede contactarlos por este WhatsApp, atendido en horario colombiano, sin correo ni dirección publicados. Somos [MARCA], desarrolladores colombianos: recepcionista virtual bilingüe 24/7 que responde, cotiza planes de viaje dental y agenda videoconsultas. Suscripción negociable. ¿Con quién de la gerencia puedo hablar 10 minutos, o me comparte su contacto?`,
+dulcefigura:`Buenos días, una cuenta rápida para la dueña: en paquetes de 10 sesiones, cada sesión que se reagenda o se pierde por olvido es plata y cupo desperdiciado — y hoy todas se coordinan a mano por este chat. Somos [MARCA], desarrolladores colombianos: asistente que agenda, confirma y recuerda cada sesión solo, y les avisa a las clientas cuando les quedan sesiones sin usar. Suscripción pensada para spas, sin inversión grande y negociable. ¿Me colabora con el contacto de la dueña o le reenvía esto?`,
+evoself:`(Conseguir WA por Maps/IG.) Buenos días, su web evo-self.com está mostrando un error de seguridad (certificado vencido) a todos los pacientes que la visitan — ¿me colabora con el contacto de la gerencia? Es algo que les conviene resolver esta semana; somos [MARCA], desarrolladores colombianos: lo arreglamos y de paso les muestro cómo automatizar la atención por WhatsApp, por suscripción negociable.`,
+oasis:`Hola, ¿hablo con el propietario del Oasis? Les escribo por una cuenta que me pareció injusta: tienen 9.8 en Booking — de las mejores notas de toda la costa — y aun así pagan comisión por cada reserva, porque no existe un canal directo propio. Somos [MARCA], desarrolladores colombianos: web propia + asistente de WhatsApp que cotiza y confirma reservas directas 24/7. Va por suscripción mensual que normalmente sale de la comisión ahorrada de 2-3 reservas, y las condiciones las negociamos para que funcione para ambos. ¿Le muestro en 10 minutos cómo quedaría?`,
+casajaguar:`Hola María — le escribo en español pero vi que su web está toda en inglés, así que su huésped es internacional. Y ahí está el punto: cada consulta de un viajero de Nueva York o Berlín entra a su WhatsApp personal, en su zona horaria, con su horario de sueño. Somos [MARCA], desarrolladores colombianos: un asistente que responde en el idioma del huésped al instante, cotiza las 4 habitaciones y le deja a usted solo la confirmación. Suscripción mensual negociable — para 4 habitaciones, la armamos a esa medida. ¿Le muestro la demo en 10 minutos, o prefiere que hable con alguien más del hotel?`,
+edmar:`Buenos días, más de 50 años en El Rodadero — el Edmar es historia viva de la zona. Le escribo a la administración por algo que el mercado cambió: cada vez llega más turista extranjero a Rodadero, y la web del hotel no tiene inglés ni el chat responde fuera de horario. El hotel que fundaron hace 50 años compite hoy con hostales que responden en 30 segundos en cualquier idioma. Somos [MARCA], desarrolladores colombianos: web en inglés + asistente bilingüe 24/7 conectado a su motor OmniBees. Suscripción o entrega del software con código — como prefieran, condiciones negociables. ¿Con quién de la gerencia puedo hablar 10 minutos?`,
+tucan:`Hola Alicia y Marco, les escribo conociendo la realidad de Capurganá: allá la señal va y viene, y su única forma de reservar es este WhatsApp. O sea que cuando ustedes no tienen conexión, el hotel está cerrado para el mundo. Somos [MARCA], desarrolladores colombianos: un asistente que responde por ustedes 24/7 — disponibilidad, tarifas, cómo llegar, en español o inglés — y les deja las reservas confirmadas para cuando vuelvan a tener señal. Suscripción mensual sin inversión grande, condiciones negociables. ¿Les muestro cómo funciona en 10 minutos cuando tengan buena conexión?`,
+selvaminca:`Hola, 37 mil seguidores para 12 unidades — Selva Minca tiene el problema más envidiable del sector: más demanda que capacidad de responderla. Cada reel que se viraliza son decenas de DMs y WhatsApps preguntando lo mismo: fechas, tarifas, cómo subir a Minca. Somos [MARCA], desarrolladores colombianos: asistente en inglés y español que responde todo eso al instante y empuja la reserva a su Cloudbeds — ustedes solo ven las confirmadas. Suscripción mensual negociable. ¿Hablo con la persona propietaria o me comparte su contacto? Demo de 10 minutos.`,
+makao:`Hola, vi que Makao pasó de hotel de playa a marca — 27 mil seguidores, bodas, eventos. Cuando una marca crece así, la operación digital suele quedarse atrás: hoy las consultas siguen entrando a un WhatsApp manual y el correo del hotel es un Gmail. Somos [MARCA], desarrolladores colombianos: asistente bilingüe 24/7 que responde, cotiza eventos y empuja reservas a su LobbyPMS, más correo corporativo. Suscripción negociable. ¿Hablo con la persona propietaria, o me comparte su contacto? 10 minutos de demo.`,
+yachay:`Hola, ustedes tienen algo único — el único hotel dentro del Tayrona — y eso significa que responden las mismas preguntas todos los días: entradas al parque, senderos, traslados, qué llevar. Además vi que atienden por tres números distintos. Somos [MARCA], desarrolladores colombianos: un asistente bilingüe que unifica las líneas, responde todo el FAQ del parque solo y empuja la reserva directa — cada una que no pasa por Booking son ~15% de comisión que se quedan ustedes. Suscripción negociable. ¿Con quién de la gerencia hablo 10 minutos?`,
+coliseo:`Buenos días, vi que Casa del Coliseo premia la reserva directa con 15% de descuento — estrategia correcta que pocas casonas de Cartagena hacen. El eslabón que falta: el huésped que duda entre Booking y ustedes escribe a este WhatsApp… y si es de otra zona horaria, la respuesta llega cuando ya reservó por Booking. Somos [MARCA], desarrolladores colombianos: asistente bilingüe que responde al instante y cierra esa reserva directa con su descuento. Suscripción o entrega de software con código, condiciones negociables. ¿Con quién de la gerencia puedo hablar 10 minutos?`,
+casacarolina:`Buenos días, Travellers' Choice todos los años desde 2014 — Casa Carolina es referencia del centro de Santa Marta. Le escribo por un detalle operativo: el huésped internacional que los encuentra escribe a dos números de WhatsApp atendidos a mano, mientras su motor de reservas espera en la web. Somos [MARCA], desarrolladores colombianos: asistente bilingüe que responde al instante y lleva al huésped directo a reservar en su LobbyPMS. Suscripción mensual negociable. ¿Me colabora con el contacto de la gerencia o le reenvía este mensaje? Demo de 10 minutos.`,
+placita:`Buenos días, 8 habitaciones temáticas en una casa de 1925 frente al Parque de los Novios — Placita Vieja tiene el encanto que el viajero busca. Lo que vi: atienden por dos números de WhatsApp distintos, y con 8 habitaciones cada reserva cuenta. Somos [MARCA], desarrolladores colombianos: un asistente que unifica las líneas, responde en inglés o español y empuja la reserva a su motor. Suscripción pensada para hoteles boutique — sin inversión grande, negociable. ¿Hablo con la persona propietaria o me comparte su contacto?`,
+utta:`Hola, la Ranchería Utta es de los hospedajes con más identidad de toda La Guajira — 13 mil seguidores lo confirman. Les escribo porque sé cómo es la operación en el Cabo: cada reserva se confirma a mano por este WhatsApp, con la señal que haya, y los viajeros preguntan siempre lo mismo — cómo llegar, qué incluye, qué llevar. Somos [MARCA], desarrolladores colombianos: un asistente que responde todo eso solo, en español o inglés, y confirma reservas aunque ustedes estén sin conexión. Suscripción sin inversión grande, negociable. ¿Hablo con la persona dueña? 10 minutos de demo.`,
+cocoplum:`Buenos días, con 44 habitaciones frente al mar en San Luis, Cocoplum maneja un volumen de consultas que pocos independientes de la isla tienen: vuelos, traslados, tours, disponibilidad — todo entra a recepción. Somos [MARCA], desarrolladores colombianos: un asistente trilingüe (como su web) que responde ese FAQ de isla 24/7 y empuja la reserva directa. Para un hotel de su tamaño ofrecemos suscripción o entrega del software con código propio — condiciones negociables. ¿Con quién de la gerencia puedo hablar 10 minutos, o me comparte su contacto?`,
+casacolonial:`Buenos días, 9.3 en Booking con 13 habitaciones en El Prado — Casa Colonial tiene la calidad; lo que le falta es el canal. Hoy casi toda reserva pasa por Booking (~15% de comisión), la web no tiene inglés y el correo del hotel es un Hotmail. En una ciudad de Carnaval, conciertos y negocios, eso es dejar plata en la mesa cada temporada. Somos [MARCA], desarrolladores colombianos: web con inglés + asistente que cierra reservas directas por WhatsApp. Suscripción negociable que sale de la comisión ahorrada. ¿Hablo con la persona propietaria o me comparte su contacto?`,
+mamallena:`Hola, un dato técnico que quizás no saben: su web hostelmamallenarincondelmar.com les aparece vacía a Google — los buscadores no pueden leerla, así que el viajero que googlea "hostel Rincón del Mar" no los encuentra por ahí, y todo termina en Hostelworld o Booking pagando comisión. Somos [MARCA], desarrolladores colombianos: web que sí se indexe + asistente de WhatsApp en inglés y español que cierre reservas directas. Suscripción sin inversión grande, negociable. ¿Hablo con la persona dueña? Se lo muestro en 10 minutos.`,
+nuba:`(Por DM de IG o chat de Booking.) Hola, ¿este es el canal de Nuba? Los busqué porque son el #1 de Palomino en TripAdvisor y me pareció increíble algo: con esa reputación, no tienen web propia — cada reserva que su fama genera pasa por Booking y les cobra ~15%. Somos [MARCA], desarrolladores colombianos: web + asistente de WhatsApp que convierte esa reputación en reservas directas. Suscripción que sale de la comisión ahorrada, condiciones negociables. ¿Me comparten el WhatsApp de la persona dueña? Le muestro la idea en 10 minutos.`,
+bluesea:`(Por su página de Facebook.) Hola, ¿hablo con Hostel Blue Sea? 31 habitaciones frente al mar y toda la operación por Facebook y Booking — cada reserva paga ~15% de comisión que podría quedarse en el hostel. Somos [MARCA], desarrolladores colombianos: web propia + asistente de WhatsApp en inglés y español que cierra reservas directas. Suscripción sin inversión grande, negociable. ¿Me comparten el contacto de la persona dueña? 10 minutos de demo.`,
+};
+// Toque 2 por segmento (72h después) y toque 3 (día 7)
+const T2={
+Webcam:`Hola de nuevo — les dejo un solo dato y no molesto más por esta semana: un monitor/chatter humano cuesta alrededor de $2.000.000 al mes por turno, y cubrir 24/7 exige varios; nuestra IA hace esa primera línea por una fracción. Si me comparten el contacto de la persona dueña, el resto lo hago yo. Gracias.`,
+OnlyFans:`Hola de nuevo — un solo dato y no molesto más por esta semana: cubrir una cuenta 24/7 con chatters humanos cuesta entre USD 1.200 y 3.600 al mes (3 turnos); nuestra IA hace la primera línea por una fracción de UN turno. Si me comparten el contacto de la persona dueña, el resto lo hago yo. Gracias.`,
+"Clínicas":`Buenos días, un solo dato y no molesto más por esta semana: una clínica pierde en promedio 1 de cada 4 valoraciones agendadas por inasistencia, y el recordatorio automático recupera la mayoría — además del paciente extranjero que hoy escribe de noche y no recibe respuesta. Si me colabora con el contacto de la gerencia, el resto lo hago yo. Gracias.`,
+Hoteles:`Hola de nuevo — un solo dato y no molesto más por esta semana: una reserva de $500.000 por Booking les cuesta ~$75.000 de comisión; el asistente de reservas directas se paga con 2-3 reservas al mes. Si me comparten el contacto de la persona propietaria, el resto lo hago yo. Gracias.`,
+};
+const T3=`Hola, último mensaje de mi parte — sé que el canal está para otra cosa y lo respeto. Les dejo esto: somos [MARCA], automatizamos la atención por WhatsApp con IA por suscripción mensual negociable, y la demo son 10 minutos. Si en algún momento el tema entra en agenda, este número queda a la orden. Que les vaya muy bien.`;
+
+// ===== Estado =====
+const KEY="radar-tracker-v1";
+const ESTADOS={pend:"Sin contactar",t1:"Toque 1",t2:"Toque 2",t3:"Toque 3",resp:"Respondió",demo:"Demo",neg:"Negociando",cli:"Cliente",desc:"Descartado"};
+const NEXT={pend:"t1",t1:"t2",t2:"t3"};
+let state={};
+let storageOK=true;
+try{
+  localStorage.setItem("__t","1");localStorage.removeItem("__t");
+  state=JSON.parse(localStorage.getItem(KEY)||"{}");
+}catch(e){storageOK=false;document.getElementById("storagewarn").style.display="block";}
+function save(){ if(!storageOK) return; try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){} }
+let SYNC={online:false};
+function persist(id){ save(); if(SYNC.online&&state[id])SYNC.save(id,state[id]).catch(()=>{}); }
+function st(id){ return state[id]||(state[id]={e:"pend",n:"",h:[]}); }
+function hoy(){ return new Date().toISOString().slice(0,10); }
+function setEstado(id,e){ const s=st(id); s.e=e; s.h.push({e,f:hoy()}); persist(id); render(); }
+
+// ===== Filtros =====
+const $=q=>document.querySelector(q);
+let fEstadoChip="", fNicho="";
+["f-prio","f-estado","f-q"].forEach(i=>$("#"+i).addEventListener("input",()=>{fEstadoChip="";render();}));
+document.querySelectorAll("#tabs .tab").forEach(t=>t.onclick=()=>{
+  fNicho=t.dataset.s;
+  document.querySelectorAll("#tabs .tab").forEach(x=>x.classList.toggle("active",x===t));
+  render();
+});
+
+function counts(){
+  const c={};Object.keys(ESTADOS).forEach(k=>c[k]=0);
+  P.forEach(p=>c[st(p.id).e]++);
+  const el=$("#counts");el.innerHTML="";
+  Object.entries(ESTADOS).forEach(([k,label])=>{
+    const b=document.createElement("span");
+    b.className="count"+(fEstadoChip===k?" active":"");
+    b.innerHTML="<b>"+c[k]+"</b> "+label;
+    b.onclick=()=>{fEstadoChip=fEstadoChip===k?"":k;$("#f-estado").value="";render();};
+    el.appendChild(b);
+  });
+}
+
+function render(){
+  counts();
+  const nicho=fNicho, prio=$("#f-prio").value,
+        estado=fEstadoChip||$("#f-estado").value, q=$("#f-q").value.trim().toLowerCase();
+  const list=$("#list");list.innerHTML="";
+  let shown=0;
+  const orden={P1:0,P2:1,P3:2};
+  [...P].sort((a,b)=>orden[a.p]-orden[b.p]||a.n.localeCompare(b.n)).forEach(p=>{
+    const s=st(p.id);
+    if(nicho&&p.s!==nicho)return;
+    if(prio&&p.p!==prio)return;
+    if(estado&&s.e!==estado)return;
+    if(q&&!(p.n+" "+p.c+" "+(p.w||"")+" "+(p.m||"")+" "+p.g).toLowerCase().includes(q))return;
+    shown++;
+    const last=s.h.length?s.h[s.h.length-1]:null;
+    const row=document.createElement("div");
+    row.className="row"+(s.e==="desc"?" desc-state":"");
+    let contact="";
+    if(p.w)contact+='<div><span class="lbl">WA</span> <a href="https://wa.me/'+p.w+'" target="_blank" rel="noopener">+'+p.w+"</a></div>";
+    if(p.m)contact+='<div><span class="lbl">Mail</span> <a href="mailto:'+p.m+'">'+p.m+"</a></div>";
+    if(p.x)contact+='<div><span class="lbl">Otro</span> '+p.x+"</div>";
+    if(!contact)contact='<div class="lbl">sin canal — conseguir contacto</div>';
+    let acts="";
+    if(NEXT[s.e])acts+='<button data-a="'+NEXT[s.e]+'" data-id="'+p.id+'">Registrar toque '+NEXT[s.e][1]+"</button>";
+    if(!["resp","demo","neg","cli"].includes(s.e))acts+='<button data-a="resp" data-id="'+p.id+'">Respondió</button>';
+    if(["resp"].includes(s.e))acts+='<button data-a="demo" data-id="'+p.id+'">Demo</button>';
+    if(["demo"].includes(s.e))acts+='<button data-a="neg" data-id="'+p.id+'">Negociando</button>';
+    if(["resp","demo","neg"].includes(s.e))acts+='<button data-a="cli" data-id="'+p.id+'">Cliente ✓</button>';
+    if(s.e!=="desc"&&s.e!=="cli")acts+='<button data-a="desc" data-id="'+p.id+'">Descartar</button>';
+    if(s.e==="desc"||s.e==="cli")acts+='<button data-a="pend" data-id="'+p.id+'">Reabrir</button>';
+    row.innerHTML=
+      '<div><div class="rname">'+p.n+'</div><div class="rmeta">'+p.c+"</div>"+
+      '<div class="chips"><span class="chip'+(p.p==="P1"?" p1":"")+'">'+p.p+'</span><span class="chip">'+p.s+'</span><span class="chip">'+p.t+"</span></div></div>"+
+      '<div class="contact">'+contact+"</div>"+
+      '<div class="gancho"><b>Gancho:</b> '+p.g+"</div>"+
+      '<div class="state-col"><span class="estado st-'+s.e+'">'+ESTADOS[s.e]+"</span>"+
+      (last?'<span class="fecha">Último: '+ESTADOS[last.e]+" · "+last.f+"</span>":"")+
+      '<div class="acts">'+acts+"</div>"+
+      '<textarea class="notas" data-id="'+p.id+'" placeholder="Notas (a quién te derivaron, qué dijeron…)">'+(s.n||"")+"</textarea></div>"+
+      (M[p.id]?'<details class="msgbox"><summary>Mensaje de primer contacto — ver y copiar</summary>'+
+        '<div class="msgtext">'+M[p.id]+"</div>"+
+        '<div class="msgbtns">'+
+        '<button data-c="m1" data-id="'+p.id+'">Copiar mensaje</button>'+
+        '<button data-c="t2" data-id="'+p.id+'" data-s="'+p.s+'">Copiar toque 2 (72h)</button>'+
+        '<button data-c="t3" data-id="'+p.id+'">Copiar toque 3 (día 7)</button>'+
+        "</div></details>":"");
+    list.appendChild(row);
+  });
+  $("#empty").hidden=shown>0;
+  list.querySelectorAll("button[data-a]").forEach(b=>b.onclick=()=>setEstado(b.dataset.id,b.dataset.a));
+  list.querySelectorAll(".notas").forEach(t=>t.onchange=()=>{st(t.dataset.id).n=t.value;persist(t.dataset.id);});
+  list.querySelectorAll("button[data-c]").forEach(b=>b.onclick=async()=>{
+    const txt=b.dataset.c==="m1"?M[b.dataset.id]:b.dataset.c==="t2"?T2[b.dataset.s]:T3;
+    let ok=false;
+    try{await navigator.clipboard.writeText(txt);ok=true;}
+    catch(e){
+      const ta=document.createElement("textarea");ta.value=txt;document.body.appendChild(ta);
+      ta.select();try{ok=document.execCommand("copy");}catch(_){ }ta.remove();
+    }
+    const orig=b.textContent;
+    b.textContent=ok?"¡Copiado!":"No se pudo copiar";b.classList.add("copied");
+    setTimeout(()=>{b.textContent=orig;b.classList.remove("copied");},1500);
+  });
+}
+
+// ===== Export / Import =====
+function dl(name,content,type){
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+}
+$("#btn-export").onclick=()=>dl("tracker-respaldo-"+hoy()+".json",JSON.stringify(state,null,1),"application/json");
+$("#btn-import").onclick=()=>$("#file-import").click();
+$("#file-import").onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  f.text().then(t=>{try{state=JSON.parse(t);save();render();if(SYNC.online)SYNC.saveMany(Object.keys(state).map(id=>({id,data:state[id]}))).catch(()=>{});}catch(err){alert("JSON inválido");}});
+  e.target.value="";
+};
+$("#btn-csv").onclick=()=>{
+  const esc=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
+  let csv="﻿Nombre;Nicho;Ciudad;Tier;Prioridad;WhatsApp;Correo;Otro canal;Gancho;Estado;Última acción;Fecha;Notas;Mensaje 1er contacto\n";
+  P.forEach(p=>{const s=st(p.id);const last=s.h.length?s.h[s.h.length-1]:null;
+    csv+=[p.n,p.s,p.c,p.t,p.p,p.w?"+"+p.w:"",p.m||"",p.x||"",p.g,ESTADOS[s.e],last?ESTADOS[last.e]:"",last?last.f:"",s.n||"",M[p.id]||""].map(esc).join(";")+"\n";});
+  dl("tracker-prospeccion-"+hoy()+".csv",csv,"text/csv;charset=utf-8");
+};
+
+document.getElementById("total").textContent=P.length;
+render();
+fetch("config.json").then(r=>r.ok?r.json():null).catch(()=>null).then(cfg=>{
+  if(!cfg||!window.RadarSync)return;
+  RadarSync.init(cfg,"tracker",state,m=>{state=m;save();render();}).then(s=>{SYNC=s;});
+});
+</script>
+</body>
+</html>
