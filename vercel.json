@@ -1,0 +1,10 @@
+{
+  "rewrites": [
+    { "source": "/data/:path*", "destination": "https://radar-nocturno.onrender.com/data/:path*" },
+    { "source": "/config.json", "destination": "https://radar-nocturno.onrender.com/config.json" },
+    { "source": "/healthz", "destination": "https://radar-nocturno.onrender.com/healthz" }
+  ],
+  "headers": [
+    { "source": "/(.*)", "headers": [ { "key": "X-Robots-Tag", "value": "noindex" } ] }
+  ]
+}

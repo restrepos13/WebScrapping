@@ -36,6 +36,15 @@ Si molesta: crear un monitor gratuito en cron-job.org o UptimeRobot que haga GET
 `https://<tu-servicio>.onrender.com/healthz` cada 10 minutos. Un solo servicio
 24/7 cabe en las 750 horas/mes del plan.
 
+## Front en Vercel (opcional, carga instantánea)
+1. vercel.com → Add New → Project → importar `restrepos13/WebScrapping`
+   (Framework Preset: **Other**; sin build command; Output: raíz). Deploy.
+2. `vercel.json` ya trae el proxy: las páginas salen del CDN de Vercel y
+   `/data/*`, `/config.json` y `/healthz` se reenvían al back de Render.
+3. Entrar SIEMPRE la primera vez con `https://<proyecto>.vercel.app/?key=TU_TOKEN`
+   — la key queda guardada en el navegador y las páginas cargan los datos.
+   (El primer fetch de datos del día puede tardar ~50s: es Render despertando.)
+
 ## Estados compartidos entre personas (Supabase)
 1. Crear cuenta/proyecto gratis en supabase.com (region São Paulo es la más cercana).
 2. SQL Editor → pegar el contenido de `supabase.sql` → Run.

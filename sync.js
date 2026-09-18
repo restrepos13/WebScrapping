@@ -1,3 +1,25 @@
+/* Llave de acceso: se toma de ?key= una vez, queda en localStorage y se
+   propaga automáticamente en los fetch relativos (config/data) — necesario
+   cuando el front (Vercel) llama al back (Render) a través del proxy. */
+(function(){
+  try{
+    const u=new URL(location.href), k=u.searchParams.get("key");
+    if(k)localStorage.setItem("radar-key",k);
+  }catch(e){}
+  const clave=()=>{try{return localStorage.getItem("radar-key")||""}catch(e){return ""}};
+  const _f=window.fetch.bind(window);
+  window.fetch=(input,init)=>{
+    try{
+      const url=typeof input==="string"?input:input.url;
+      if(clave()&&url&&!/^https?:/i.test(url)){
+        const sep=url.includes("?")?"&":"?";
+        input=url+sep+"key="+encodeURIComponent(clave());
+      }
+    }catch(e){}
+    return _f(input,init);
+  };
+})();
+
 /* RadarSync — estados compartidos vía Supabase (REST/PostgREST).
    Sin supabase_url/anon_key en config: modo local silencioso (localStorage, como siempre).
    Con ellos: pull inicial (remoto gana), migración automática de lo local que

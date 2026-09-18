@@ -70,14 +70,17 @@ def _json_gz(rel, sanitizar=False, mime="application/json"):
 def _puerta():
     if not TOKEN or request.path == "/healthz":
         return
-    if request.args.get("key") == TOKEN:
-        resp = redirect(request.path)
+    if request.args.get("key") == TOKEN or request.cookies.get("rk") == TOKEN:
+        return  # autorizado; la cookie se siembra en after_request
+    return Response("<body style='background:#05060A;color:#9CA2AD;font-family:monospace;"
+                    "display:grid;place-items:center;height:100vh'>acceso: agregá ?key=… a la URL</body>",
+                    status=401, content_type="text/html")
+
+@app.after_request
+def _cookie(resp):
+    if TOKEN and request.args.get("key") == TOKEN:
         resp.set_cookie("rk", TOKEN, max_age=90 * 24 * 3600, httponly=True, samesite="Lax")
-        return resp
-    if request.cookies.get("rk") != TOKEN:
-        return Response("<body style='background:#05060A;color:#9CA2AD;font-family:monospace;"
-                        "display:grid;place-items:center;height:100vh'>acceso: agregá ?key=… a la URL</body>",
-                        status=401, content_type="text/html")
+    return resp
 
 # ---------- rutas ----------
 @app.route("/")
