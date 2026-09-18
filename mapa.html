@@ -511,11 +511,24 @@ function initUI(prev){
 
 /* ================= boot ================= */
 async function boot(){
-  const [cfg,datos,croquis]=await Promise.all([
-    fetch("config.json").then(r=>r.json()),
-    fetch("data/negocios.json").then(r=>r.ok?r.json():[]).catch(()=>[]),
-    fetch("data/croquis.geojson").then(r=>r.ok?r.json():null).catch(()=>null),
-  ]);
+  let cfg,datos,croquis;
+  try{
+    [cfg,datos,croquis]=await Promise.all([
+      fetch("config.json").then(r=>{if(!r.ok)throw new Error("config "+r.status);return r.json()}),
+      fetch("data/negocios.json").then(r=>{if(r.status===401)throw new Error("data 401");return r.ok?r.json():[]}),
+      fetch("data/croquis.geojson").then(r=>r.ok?r.json():null).catch(()=>null),
+    ]);
+  }catch(e){
+    document.body.insertAdjacentHTML("beforeend",
+      `<div style="position:absolute;inset:0;z-index:50;display:grid;place-items:center;background:#05060A">
+        <div style="max-width:420px;text-align:center;font-family:'Spline Sans Mono',monospace;color:#9CA2AD;font-size:13px;line-height:1.8">
+          <b style="color:#FFB020;font-size:15px">Falta la llave de acceso</b><br>
+          Entrá una vez con <b style="color:#ECEDEF">?key=TU_TOKEN</b> al final de la URL<br>
+          (queda guardada en este navegador).<br>
+          <span style="font-size:11px;color:#5E6470">detalle: ${e.message}</span>
+        </div></div>`);
+    return;
+  }
   CFG=cfg;NEGOCIOS=datos;
   const prev=leerHash();
   const zcfg=cfg.zonas[prev.z]||Object.values(cfg.zonas)[0];
