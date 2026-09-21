@@ -32,6 +32,66 @@
         "Girón, Santander",
         "Piedecuesta, Santander"
       ]
+    },
+    "bogota": {
+      "nombre": "Bogotá",
+      "centro": [
+        4.6486,
+        -74.0821
+      ],
+      "zoom": 11,
+      "subzonas": [
+        "Chapinero, Bogotá",
+        "Usaquén, Bogotá",
+        "Teusaquillo, Bogotá",
+        "Santa Bárbara, Bogotá",
+        "Centro, Bogotá",
+        "Salitre, Bogotá"
+      ]
+    },
+    "cali": {
+      "nombre": "Cali",
+      "centro": [
+        3.4516,
+        -76.532
+      ],
+      "zoom": 12,
+      "subzonas": [
+        "Granada, Cali",
+        "San Fernando, Cali",
+        "Ciudad Jardín, Cali",
+        "Centro, Cali",
+        "Norte, Cali"
+      ]
+    },
+    "pereira": {
+      "nombre": "Pereira",
+      "centro": [
+        4.8087,
+        -75.6906
+      ],
+      "zoom": 13,
+      "subzonas": [
+        "Centro, Pereira",
+        "Pinares, Pereira",
+        "Álamos, Pereira",
+        "Circunvalar, Pereira",
+        "Dosquebradas, Risaralda"
+      ]
+    },
+    "cucuta": {
+      "nombre": "Cúcuta",
+      "centro": [
+        7.8939,
+        -72.5078
+      ],
+      "zoom": 13,
+      "subzonas": [
+        "Centro, Cúcuta",
+        "Caobos, Cúcuta",
+        "La Riviera, Cúcuta",
+        "Barrio Blanco, Cúcuta"
+      ]
     }
   },
   "categorias": [
