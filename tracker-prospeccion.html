@@ -431,10 +431,17 @@ $("#btn-csv").onclick=()=>{
 
 document.getElementById("total").textContent=P.length;
 render();
-fetch("config.json").then(r=>r.ok?r.json():null).catch(()=>null).then(cfg=>{
-  if(!cfg||!window.RadarSync)return;
-  RadarSync.init(cfg,"tracker",state,m=>{state=m;save();render();}).then(s=>{SYNC=s;});
-});
+(async()=>{
+  if(!window.RadarSync)return;
+  fetch("healthz").catch(()=>{});
+  let cfg=null;
+  for(let i=0;!(cfg&&cfg.supabase_url)&&i<4;i++){
+    if(i)await new Promise(r=>setTimeout(r,20000));
+    try{cfg=await fetch("config.json").then(r=>r.ok?r.json():null)}catch(e){}
+  }
+  if(!cfg||!cfg.supabase_url)return;
+  SYNC=await RadarSync.init(cfg,"tracker",state,m=>{state=m;save();render();});
+})();
 </script>
 </body>
 </html>

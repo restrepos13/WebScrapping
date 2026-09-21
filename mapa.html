@@ -511,10 +511,17 @@ function initUI(prev){
 
 /* ================= boot ================= */
 async function boot(){
+  fetch("healthz").catch(()=>{}); // despierta a Render en paralelo, sin esperar
+  const conTimeout=(url,ms)=>{const c=new AbortController();const t=setTimeout(()=>c.abort(),ms);
+    return fetch(url,{signal:c.signal}).then(r=>{if(!r.ok)throw new Error(url+" "+r.status);return r.json()}).finally(()=>clearTimeout(t));};
+  const cargarCfg=async()=>{
+    try{return await conTimeout("config.json",6000)}catch(e){}
+    return await conTimeout("config.public.json",6000); // estática en Vercel: el mapa nunca espera a Render
+  };
   let cfg,datos,croquis;
   try{
     [cfg,datos,croquis]=await Promise.all([
-      fetch("config.json").then(r=>{if(!r.ok)throw new Error("config "+r.status);return r.json()}),
+      cargarCfg(),
       fetch("data/negocios.json").then(r=>{if(r.status===401)throw new Error("data 401");return r.ok?r.json():[]}),
       fetch("data/croquis.geojson").then(r=>r.ok?r.json():null).catch(()=>null),
     ]);
@@ -546,7 +553,16 @@ async function boot(){
     map.on("mouseleave",layer,()=>map.getCanvas().style.cursor="");
   });
   setupSeleccion();
-  RadarSync.init(cfg,"mapa",EST,m=>{EST=m;saveEst();pintar()}).then(s=>{SYNC=s;if(s.online)toast("Estados sincronizados con la base compartida")});
+  (async()=>{ // la base de estados se conecta cuando Render despierte, sin frenar el mapa
+    let c=cfg&&cfg.supabase_url?cfg:null;
+    for(let i=0;!c&&i<4;i++){
+      await new Promise(r=>setTimeout(r,i===0?3000:20000));
+      try{const x=await fetch("config.json").then(r=>r.ok?r.json():null);if(x&&x.supabase_url)c=x}catch(e){}
+    }
+    if(!c){toast("Estados solo en este navegador (base no disponible)");return}
+    const s=await RadarSync.init(c,"mapa",EST,m=>{EST=m;saveEst();pintar()});
+    SYNC=s;if(s.online)toast("Estados sincronizados con la base compartida");
+  })();
   window.RADAR={map,negocios:NEGOCIOS,estados:()=>EST,repintar:pintar,score,mensajeDe};
 }
 boot();
