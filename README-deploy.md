@@ -5,7 +5,7 @@
   Con 0.1 CPU y 512MB sobra.
 - **El pipeline corre LOCAL** (scan.py → audit.py → enrich_empresas.py). El disco de
   Render es efímero: cualquier cosa escrita allá se borra al dormirse. Los datos
-  viajan dentro del repo (`data/negocios.json`).
+  viajan dentro del repo (`data/zonas/*.json`, un archivo por zona).
 - Los estados/notas del mapa y del tracker viven en el navegador de quien lo usa
   (localStorage) — no dependen del servidor.
 
@@ -23,12 +23,28 @@
    (la key queda en cookie 90 días; después entrás sin ella).
 
 ## Actualizar datos (cada vez que barras/audites)
+Los datos viven en `data/zonas/<zona>.json` (una zona = un archivo; el mapa baja
+solo la que mira) + `data/zonas/index.json`. `data/registros/` son índices crudos
+locales (BORME, geocodificación) y no se suben.
+
+| País | Fuentes | Comando |
+|---|---|---|
+| Colombia | Google Places (principal) · OSM · RUES | `python3 scan.py --zona medellin` · `python3 osm.py --pais CO` |
+| España | Google Places (principal) · OSM · BORME · OpenMercantil | `./barrido_nocturno.sh ES` (de noche: horas) · `python3 scan.py --zona es-madrid` |
+| Texas | Google Places (principal) · OSM · Comptroller · TBAE · Census | `python3 texas.py` · `python3 osm.py --pais TX` |
+
+Después de cualquier barrido:
 ```
-python3 scan.py --zona medellin   # o bucaramanga
-python3 audit.py
-git add data/ && git commit -m "datos $(date +%F)" && git push
+python3 enrich_empresas.py --pais CO   # registros oficiales (RUES / BORME / Comptroller)
+python3 audit.py --pais CO             # señales de la web + gancho
+git add data/zonas && git commit -m "datos $(date +%F)" && git push
 ```
-Render redespliega solo con el push (~1 min).
+- `scan.py` (Google) muestra el costo estimado y pide confirmar; `--max-consultas`
+  (default 900 ≈ cupo gratis mensual) es un tope duro.
+- Fuentes de pago (Registradores, Texas SOS, Foursquare) no se usan.
+- Zonas de España/Texas: `python3 paises.py --sync-config` las regenera en ambos config.
+- Verticales nuevos (solo Colombia): energía solar, muebles y cocinas, CDA y talleres,
+  ferretería y materiales, agencias de seguros (`categorias.py`).
 
 ## Evitar el sleep de 15 min (opcional)
 El free tier duerme el servicio tras 15 min sin tráfico (despertar tarda ~50s).

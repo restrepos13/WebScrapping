@@ -1,0 +1,183 @@
+{
+ "bogota": {
+  "pais": "CO",
+  "n": 2420,
+  "actualizado": "2026-10-05"
+ },
+ "bucaramanga": {
+  "pais": "CO",
+  "n": 1697,
+  "actualizado": "2026-10-05"
+ },
+ "cali": {
+  "pais": "CO",
+  "n": 1601,
+  "actualizado": "2026-10-05"
+ },
+ "cucuta": {
+  "pais": "CO",
+  "n": 865,
+  "actualizado": "2026-10-05"
+ },
+ "es-a-coruna": {
+  "pais": "ES",
+  "n": 2,
+  "actualizado": "2026-10-05"
+ },
+ "es-alicante": {
+  "pais": "ES",
+  "n": 2,
+  "actualizado": "2026-10-05"
+ },
+ "es-almeria": {
+  "pais": "ES",
+  "n": 1,
+  "actualizado": "2026-10-05"
+ },
+ "es-asturias": {
+  "pais": "ES",
+  "n": 4,
+  "actualizado": "2026-10-05"
+ },
+ "es-baleares": {
+  "pais": "ES",
+  "n": 5,
+  "actualizado": "2026-10-05"
+ },
+ "es-burgos": {
+  "pais": "ES",
+  "n": 2,
+  "actualizado": "2026-10-05"
+ },
+ "es-cadiz": {
+  "pais": "ES",
+  "n": 1,
+  "actualizado": "2026-10-05"
+ },
+ "es-girona": {
+  "pais": "ES",
+  "n": 1,
+  "actualizado": "2026-10-05"
+ },
+ "es-jaen": {
+  "pais": "ES",
+  "n": 1,
+  "actualizado": "2026-10-05"
+ },
+ "es-las-palmas": {
+  "pais": "ES",
+  "n": 3,
+  "actualizado": "2026-10-05"
+ },
+ "es-leon": {
+  "pais": "ES",
+  "n": 2,
+  "actualizado": "2026-10-05"
+ },
+ "es-lleida": {
+  "pais": "ES",
+  "n": 1,
+  "actualizado": "2026-10-05"
+ },
+ "es-madrid": {
+  "pais": "ES",
+  "n": 9,
+  "actualizado": "2026-10-05"
+ },
+ "es-malaga": {
+  "pais": "ES",
+  "n": 3,
+  "actualizado": "2026-10-05"
+ },
+ "es-navarra": {
+  "pais": "ES",
+  "n": 1,
+  "actualizado": "2026-10-05"
+ },
+ "es-soria": {
+  "pais": "ES",
+  "n": 378,
+  "actualizado": "2026-10-05",
+  "osm": "2026-10-02"
+ },
+ "es-valencia": {
+  "pais": "ES",
+  "n": 5,
+  "actualizado": "2026-10-05"
+ },
+ "es-zaragoza": {
+  "pais": "ES",
+  "n": 4,
+  "actualizado": "2026-10-05"
+ },
+ "medellin": {
+  "pais": "CO",
+  "n": 7700,
+  "actualizado": "2026-10-05"
+ },
+ "pereira": {
+  "pais": "CO",
+  "n": 1197,
+  "actualizado": "2026-10-05"
+ },
+ "tx-alamo": {
+  "pais": "TX",
+  "n": 1238,
+  "actualizado": "2026-10-05"
+ },
+ "tx-capital": {
+  "pais": "TX",
+  "n": 1384,
+  "actualizado": "2026-10-05"
+ },
+ "tx-central": {
+  "pais": "TX",
+  "n": 309,
+  "actualizado": "2026-10-05"
+ },
+ "tx-gulf-coast": {
+  "pais": "TX",
+  "n": 3163,
+  "actualizado": "2026-10-05"
+ },
+ "tx-high-plains": {
+  "pais": "TX",
+  "n": 303,
+  "actualizado": "2026-10-05"
+ },
+ "tx-metroplex": {
+  "pais": "TX",
+  "n": 3777,
+  "actualizado": "2026-10-05"
+ },
+ "tx-northwest": {
+  "pais": "TX",
+  "n": 154,
+  "actualizado": "2026-10-05"
+ },
+ "tx-south": {
+  "pais": "TX",
+  "n": 869,
+  "actualizado": "2026-10-05"
+ },
+ "tx-southeast": {
+  "pais": "TX",
+  "n": 164,
+  "actualizado": "2026-10-05"
+ },
+ "tx-upper-east": {
+  "pais": "TX",
+  "n": 361,
+  "actualizado": "2026-10-05"
+ },
+ "tx-upper-rio-grande": {
+  "pais": "TX",
+  "n": 404,
+  "actualizado": "2026-10-05"
+ },
+ "tx-west": {
+  "pais": "TX",
+  "n": 244,
+  "actualizado": "2026-10-05"
+ }
+}

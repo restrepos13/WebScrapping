@@ -16,7 +16,8 @@
         "Itagüí, Antioquia",
         "Sabaneta, Antioquia",
         "Bello, Antioquia"
-      ]
+      ],
+      "pais": "CO"
     },
     "bucaramanga": {
       "nombre": "Bucaramanga y alrededores",
@@ -31,7 +32,8 @@
         "Floridablanca, Santander",
         "Girón, Santander",
         "Piedecuesta, Santander"
-      ]
+      ],
+      "pais": "CO"
     },
     "bogota": {
       "nombre": "Bogotá",
@@ -47,7 +49,8 @@
         "Santa Bárbara, Bogotá",
         "Centro, Bogotá",
         "Salitre, Bogotá"
-      ]
+      ],
+      "pais": "CO"
     },
     "cali": {
       "nombre": "Cali",
@@ -62,7 +65,8 @@
         "Ciudad Jardín, Cali",
         "Centro, Cali",
         "Norte, Cali"
-      ]
+      ],
+      "pais": "CO"
     },
     "pereira": {
       "nombre": "Pereira",
@@ -77,7 +81,8 @@
         "Álamos, Pereira",
         "Circunvalar, Pereira",
         "Dosquebradas, Risaralda"
-      ]
+      ],
+      "pais": "CO"
     },
     "cucuta": {
       "nombre": "Cúcuta",
@@ -91,7 +96,636 @@
         "Caobos, Cúcuta",
         "La Riviera, Cúcuta",
         "Barrio Blanco, Cúcuta"
-      ]
+      ],
+      "pais": "CO"
+    },
+    "es-a-coruna": {
+      "nombre": "A Coruña",
+      "pais": "ES",
+      "centro": [
+        43.3623,
+        -8.4115
+      ],
+      "zoom": 10,
+      "iso": "ES-C"
+    },
+    "es-alava": {
+      "nombre": "Álava",
+      "pais": "ES",
+      "centro": [
+        42.8467,
+        -2.6716
+      ],
+      "zoom": 10,
+      "iso": "ES-VI"
+    },
+    "es-albacete": {
+      "nombre": "Albacete",
+      "pais": "ES",
+      "centro": [
+        38.9943,
+        -1.8585
+      ],
+      "zoom": 10,
+      "iso": "ES-AB"
+    },
+    "es-alicante": {
+      "nombre": "Alicante",
+      "pais": "ES",
+      "centro": [
+        38.3452,
+        -0.481
+      ],
+      "zoom": 10,
+      "iso": "ES-A"
+    },
+    "es-almeria": {
+      "nombre": "Almería",
+      "pais": "ES",
+      "centro": [
+        36.834,
+        -2.4637
+      ],
+      "zoom": 10,
+      "iso": "ES-AL"
+    },
+    "es-asturias": {
+      "nombre": "Asturias",
+      "pais": "ES",
+      "centro": [
+        43.3614,
+        -5.8494
+      ],
+      "zoom": 10,
+      "iso": "ES-O"
+    },
+    "es-avila": {
+      "nombre": "Ávila",
+      "pais": "ES",
+      "centro": [
+        40.6565,
+        -4.6818
+      ],
+      "zoom": 10,
+      "iso": "ES-AV"
+    },
+    "es-badajoz": {
+      "nombre": "Badajoz",
+      "pais": "ES",
+      "centro": [
+        38.8794,
+        -6.9707
+      ],
+      "zoom": 10,
+      "iso": "ES-BA"
+    },
+    "es-baleares": {
+      "nombre": "Illes Balears",
+      "pais": "ES",
+      "centro": [
+        39.5696,
+        2.6502
+      ],
+      "zoom": 10,
+      "iso": "ES-PM"
+    },
+    "es-barcelona": {
+      "nombre": "Barcelona",
+      "pais": "ES",
+      "centro": [
+        41.3874,
+        2.1686
+      ],
+      "zoom": 10,
+      "iso": "ES-B"
+    },
+    "es-bizkaia": {
+      "nombre": "Bizkaia",
+      "pais": "ES",
+      "centro": [
+        43.263,
+        -2.935
+      ],
+      "zoom": 10,
+      "iso": "ES-BI"
+    },
+    "es-burgos": {
+      "nombre": "Burgos",
+      "pais": "ES",
+      "centro": [
+        42.3439,
+        -3.6969
+      ],
+      "zoom": 10,
+      "iso": "ES-BU"
+    },
+    "es-caceres": {
+      "nombre": "Cáceres",
+      "pais": "ES",
+      "centro": [
+        39.4753,
+        -6.3724
+      ],
+      "zoom": 10,
+      "iso": "ES-CC"
+    },
+    "es-cadiz": {
+      "nombre": "Cádiz",
+      "pais": "ES",
+      "centro": [
+        36.5271,
+        -6.2886
+      ],
+      "zoom": 10,
+      "iso": "ES-CA"
+    },
+    "es-cantabria": {
+      "nombre": "Cantabria",
+      "pais": "ES",
+      "centro": [
+        43.4623,
+        -3.81
+      ],
+      "zoom": 10,
+      "iso": "ES-S"
+    },
+    "es-castellon": {
+      "nombre": "Castellón",
+      "pais": "ES",
+      "centro": [
+        39.9864,
+        -0.0513
+      ],
+      "zoom": 10,
+      "iso": "ES-CS"
+    },
+    "es-ceuta": {
+      "nombre": "Ceuta",
+      "pais": "ES",
+      "centro": [
+        35.8894,
+        -5.3213
+      ],
+      "zoom": 10,
+      "iso": "ES-CE"
+    },
+    "es-ciudad-real": {
+      "nombre": "Ciudad Real",
+      "pais": "ES",
+      "centro": [
+        38.9848,
+        -3.9274
+      ],
+      "zoom": 10,
+      "iso": "ES-CR"
+    },
+    "es-cordoba": {
+      "nombre": "Córdoba",
+      "pais": "ES",
+      "centro": [
+        37.8882,
+        -4.7794
+      ],
+      "zoom": 10,
+      "iso": "ES-CO"
+    },
+    "es-cuenca": {
+      "nombre": "Cuenca",
+      "pais": "ES",
+      "centro": [
+        40.0704,
+        -2.1374
+      ],
+      "zoom": 10,
+      "iso": "ES-CU"
+    },
+    "es-gipuzkoa": {
+      "nombre": "Gipuzkoa",
+      "pais": "ES",
+      "centro": [
+        43.3183,
+        -1.9812
+      ],
+      "zoom": 10,
+      "iso": "ES-SS"
+    },
+    "es-girona": {
+      "nombre": "Girona",
+      "pais": "ES",
+      "centro": [
+        41.9794,
+        2.8214
+      ],
+      "zoom": 10,
+      "iso": "ES-GI"
+    },
+    "es-granada": {
+      "nombre": "Granada",
+      "pais": "ES",
+      "centro": [
+        37.1773,
+        -3.5986
+      ],
+      "zoom": 10,
+      "iso": "ES-GR"
+    },
+    "es-guadalajara": {
+      "nombre": "Guadalajara",
+      "pais": "ES",
+      "centro": [
+        40.6329,
+        -3.1669
+      ],
+      "zoom": 10,
+      "iso": "ES-GU"
+    },
+    "es-huelva": {
+      "nombre": "Huelva",
+      "pais": "ES",
+      "centro": [
+        37.2614,
+        -6.9447
+      ],
+      "zoom": 10,
+      "iso": "ES-H"
+    },
+    "es-huesca": {
+      "nombre": "Huesca",
+      "pais": "ES",
+      "centro": [
+        42.1401,
+        -0.4089
+      ],
+      "zoom": 10,
+      "iso": "ES-HU"
+    },
+    "es-jaen": {
+      "nombre": "Jaén",
+      "pais": "ES",
+      "centro": [
+        37.7796,
+        -3.7849
+      ],
+      "zoom": 10,
+      "iso": "ES-J"
+    },
+    "es-la-rioja": {
+      "nombre": "La Rioja",
+      "pais": "ES",
+      "centro": [
+        42.4627,
+        -2.445
+      ],
+      "zoom": 10,
+      "iso": "ES-LO"
+    },
+    "es-las-palmas": {
+      "nombre": "Las Palmas",
+      "pais": "ES",
+      "centro": [
+        28.1235,
+        -15.4363
+      ],
+      "zoom": 10,
+      "iso": "ES-GC"
+    },
+    "es-leon": {
+      "nombre": "León",
+      "pais": "ES",
+      "centro": [
+        42.5987,
+        -5.5671
+      ],
+      "zoom": 10,
+      "iso": "ES-LE"
+    },
+    "es-lleida": {
+      "nombre": "Lleida",
+      "pais": "ES",
+      "centro": [
+        41.6176,
+        0.62
+      ],
+      "zoom": 10,
+      "iso": "ES-L"
+    },
+    "es-lugo": {
+      "nombre": "Lugo",
+      "pais": "ES",
+      "centro": [
+        43.0097,
+        -7.5568
+      ],
+      "zoom": 10,
+      "iso": "ES-LU"
+    },
+    "es-madrid": {
+      "nombre": "Madrid",
+      "pais": "ES",
+      "centro": [
+        40.4168,
+        -3.7038
+      ],
+      "zoom": 10,
+      "iso": "ES-M"
+    },
+    "es-malaga": {
+      "nombre": "Málaga",
+      "pais": "ES",
+      "centro": [
+        36.7213,
+        -4.4214
+      ],
+      "zoom": 10,
+      "iso": "ES-MA"
+    },
+    "es-melilla": {
+      "nombre": "Melilla",
+      "pais": "ES",
+      "centro": [
+        35.2923,
+        -2.9381
+      ],
+      "zoom": 10,
+      "iso": "ES-ML"
+    },
+    "es-murcia": {
+      "nombre": "Murcia",
+      "pais": "ES",
+      "centro": [
+        37.9922,
+        -1.1307
+      ],
+      "zoom": 10,
+      "iso": "ES-MU"
+    },
+    "es-navarra": {
+      "nombre": "Navarra",
+      "pais": "ES",
+      "centro": [
+        42.8125,
+        -1.6458
+      ],
+      "zoom": 10,
+      "iso": "ES-NA"
+    },
+    "es-ourense": {
+      "nombre": "Ourense",
+      "pais": "ES",
+      "centro": [
+        42.3358,
+        -7.8639
+      ],
+      "zoom": 10,
+      "iso": "ES-OR"
+    },
+    "es-palencia": {
+      "nombre": "Palencia",
+      "pais": "ES",
+      "centro": [
+        42.0095,
+        -4.5288
+      ],
+      "zoom": 10,
+      "iso": "ES-P"
+    },
+    "es-pontevedra": {
+      "nombre": "Pontevedra",
+      "pais": "ES",
+      "centro": [
+        42.2406,
+        -8.7207
+      ],
+      "zoom": 10,
+      "iso": "ES-PO"
+    },
+    "es-salamanca": {
+      "nombre": "Salamanca",
+      "pais": "ES",
+      "centro": [
+        40.9701,
+        -5.6635
+      ],
+      "zoom": 10,
+      "iso": "ES-SA"
+    },
+    "es-tenerife": {
+      "nombre": "Santa Cruz de Tenerife",
+      "pais": "ES",
+      "centro": [
+        28.4636,
+        -16.2518
+      ],
+      "zoom": 10,
+      "iso": "ES-TF"
+    },
+    "es-segovia": {
+      "nombre": "Segovia",
+      "pais": "ES",
+      "centro": [
+        40.9429,
+        -4.1088
+      ],
+      "zoom": 10,
+      "iso": "ES-SG"
+    },
+    "es-sevilla": {
+      "nombre": "Sevilla",
+      "pais": "ES",
+      "centro": [
+        37.3891,
+        -5.9845
+      ],
+      "zoom": 10,
+      "iso": "ES-SE"
+    },
+    "es-soria": {
+      "nombre": "Soria",
+      "pais": "ES",
+      "centro": [
+        41.7666,
+        -2.479
+      ],
+      "zoom": 10,
+      "iso": "ES-SO"
+    },
+    "es-tarragona": {
+      "nombre": "Tarragona",
+      "pais": "ES",
+      "centro": [
+        41.1189,
+        1.2445
+      ],
+      "zoom": 10,
+      "iso": "ES-T"
+    },
+    "es-teruel": {
+      "nombre": "Teruel",
+      "pais": "ES",
+      "centro": [
+        40.3456,
+        -1.1065
+      ],
+      "zoom": 10,
+      "iso": "ES-TE"
+    },
+    "es-toledo": {
+      "nombre": "Toledo",
+      "pais": "ES",
+      "centro": [
+        39.8628,
+        -4.0273
+      ],
+      "zoom": 10,
+      "iso": "ES-TO"
+    },
+    "es-valencia": {
+      "nombre": "Valencia",
+      "pais": "ES",
+      "centro": [
+        39.4699,
+        -0.3763
+      ],
+      "zoom": 10,
+      "iso": "ES-V"
+    },
+    "es-valladolid": {
+      "nombre": "Valladolid",
+      "pais": "ES",
+      "centro": [
+        41.6523,
+        -4.7245
+      ],
+      "zoom": 10,
+      "iso": "ES-VA"
+    },
+    "es-zamora": {
+      "nombre": "Zamora",
+      "pais": "ES",
+      "centro": [
+        41.5034,
+        -5.7467
+      ],
+      "zoom": 10,
+      "iso": "ES-ZA"
+    },
+    "es-zaragoza": {
+      "nombre": "Zaragoza",
+      "pais": "ES",
+      "centro": [
+        41.6488,
+        -0.8891
+      ],
+      "zoom": 10,
+      "iso": "ES-Z"
+    },
+    "tx-gulf-coast": {
+      "nombre": "Gulf Coast · Houston",
+      "pais": "TX",
+      "centro": [
+        29.7604,
+        -95.3698
+      ],
+      "zoom": 9
+    },
+    "tx-metroplex": {
+      "nombre": "Metroplex · Dallas–Fort Worth",
+      "pais": "TX",
+      "centro": [
+        32.814,
+        -96.9489
+      ],
+      "zoom": 9
+    },
+    "tx-capital": {
+      "nombre": "Capital · Austin",
+      "pais": "TX",
+      "centro": [
+        30.2672,
+        -97.7431
+      ],
+      "zoom": 10
+    },
+    "tx-alamo": {
+      "nombre": "Alamo · San Antonio",
+      "pais": "TX",
+      "centro": [
+        29.4241,
+        -98.4936
+      ],
+      "zoom": 10
+    },
+    "tx-south": {
+      "nombre": "South Texas · Corpus Christi / RGV",
+      "pais": "TX",
+      "centro": [
+        27.0,
+        -98.2
+      ],
+      "zoom": 7
+    },
+    "tx-central": {
+      "nombre": "Central Texas · Waco / Killeen",
+      "pais": "TX",
+      "centro": [
+        31.2,
+        -97.0
+      ],
+      "zoom": 8
+    },
+    "tx-upper-rio-grande": {
+      "nombre": "Upper Rio Grande · El Paso",
+      "pais": "TX",
+      "centro": [
+        31.7619,
+        -106.485
+      ],
+      "zoom": 10
+    },
+    "tx-southeast": {
+      "nombre": "Southeast · Beaumont",
+      "pais": "TX",
+      "centro": [
+        30.6,
+        -94.4
+      ],
+      "zoom": 8
+    },
+    "tx-upper-east": {
+      "nombre": "Upper East · Tyler",
+      "pais": "TX",
+      "centro": [
+        32.6,
+        -94.9
+      ],
+      "zoom": 8
+    },
+    "tx-high-plains": {
+      "nombre": "High Plains · Lubbock / Amarillo",
+      "pais": "TX",
+      "centro": [
+        34.4,
+        -101.8
+      ],
+      "zoom": 7
+    },
+    "tx-northwest": {
+      "nombre": "Northwest · Abilene / Wichita Falls",
+      "pais": "TX",
+      "centro": [
+        32.9,
+        -99.3
+      ],
+      "zoom": 7
+    },
+    "tx-west": {
+      "nombre": "West Texas · Midland / Odessa",
+      "pais": "TX",
+      "centro": [
+        31.6,
+        -101.6
+      ],
+      "zoom": 7
     }
   },
   "categorias": [
@@ -119,5 +753,64 @@
     "restaurante"
   ],
   "supabase_url": "",
-  "supabase_anon_key": ""
+  "supabase_anon_key": "",
+  "paises": {
+    "CO": {
+      "nombre": "Colombia",
+      "idioma": "es",
+      "prefijo": "57",
+      "registro": "RUES"
+    },
+    "ES": {
+      "nombre": "España",
+      "idioma": "es",
+      "prefijo": "34",
+      "registro": "BORME"
+    },
+    "TX": {
+      "nombre": "Texas (EE.UU.)",
+      "idioma": "en",
+      "prefijo": "1",
+      "registro": "Texas Comptroller"
+    }
+  },
+  "etiquetas": {
+    "ES": {
+      "clínica estética": "clínica de medicina estética",
+      "clínica odontológica": "clínica dental",
+      "veterinaria": "clínica veterinaria",
+      "salón de belleza": "peluquería",
+      "concesionario de carros": "concesionario de coches",
+      "escuela de conducción": "autoescuela"
+    },
+    "TX": {
+      "clínica estética": "med spa / aesthetic clinic",
+      "clínica odontológica": "dental clinic",
+      "dermatólogo": "dermatologist",
+      "cirujano plástico": "plastic surgeon",
+      "veterinaria": "veterinary clinic",
+      "barbería": "barbershop",
+      "salón de belleza": "hair salon",
+      "gimnasio": "gym",
+      "inmobiliaria": "real estate agency",
+      "concesionario de motos": "motorcycle dealer",
+      "concesionario de carros": "car dealer",
+      "hotel boutique": "hotel",
+      "hostal": "hostel / B&B",
+      "academia de idiomas": "language school",
+      "escuela de conducción": "driving school",
+      "agencia de viajes": "travel agency",
+      "óptica": "optician",
+      "centro de estética": "beauty salon",
+      "estudio webcam": "webcam studio",
+      "agencia de modelos": "model agency",
+      "restaurante": "restaurant",
+      "energía solar": "solar installer",
+      "muebles y cocinas": "furniture & kitchens",
+      "CDA y talleres": "vehicle inspection & repair",
+      "ferretería y materiales": "hardware & building supplies",
+      "agencia de seguros": "insurance agency",
+      "estudio de arquitectura": "architecture firm"
+    }
+  }
 }

@@ -2,8 +2,9 @@
 """Backend del Radar Nocturno — optimizado para el plan free de Render.
 
 Diseño para free tier:
-  · Todo en memoria: negocios.json y croquis.geojson se cargan y comprimen (gzip)
-    UNA vez al arrancar; cada request sirve bytes ya listos (0.1 CPU alcanza).
+  · Datos por zona (data/zonas/<zona>.json): cada zona se comprime (gzip) la
+    primera vez que se pide y queda en un caché LRU acotado — España + Texas no
+    entran enteros en los 512MB, pero el mapa solo pide la zona que mira.
   · ETag + Cache-Control: el navegador no re-descarga los ~1MB del dataset.
   · Disco efímero de Render: acá NO se escribe nada en runtime. El pipeline
     (scan/audit/enrich) corre local y los datos se despliegan con el repo.
@@ -15,7 +16,8 @@ Diseño para free tier:
 Local:   python3 server.py            → http://localhost:8765
 Render:  gunicorn -w 1 --threads 8 -b 0.0.0.0:$PORT server:app
 """
-import gzip, hashlib, json, os
+import gzip, hashlib, json, os, re
+from collections import OrderedDict
 from flask import Flask, Response, abort, redirect, request, send_from_directory
 
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -25,7 +27,8 @@ PAGINAS = {"index.html", "mapa.html", "tracker-prospeccion.html", "sync.js"}
 app = Flask(__name__, static_folder=None)
 
 # ---------- caché en memoria (se construye una vez por arranque) ----------
-_cache = {}
+_cache = OrderedDict()
+MAX_CACHE = 24  # zonas comprimidas en memoria a la vez
 
 def _cargar(rel, sanitizar_config=False):
     ruta = os.path.join(BASE, rel)
@@ -34,6 +37,7 @@ def _cargar(rel, sanitizar_config=False):
     mtime = os.path.getmtime(ruta)
     hit = _cache.get(rel)
     if hit and hit["mtime"] == mtime:          # en Render nunca cambia; local sí
+        _cache.move_to_end(rel)
         return hit
     with open(ruta, "rb") as f:
         crudo = f.read()
@@ -45,10 +49,12 @@ def _cargar(rel, sanitizar_config=False):
     entrada = {
         "mtime": mtime,
         "gz": gzip.compress(crudo, 6),
-        "raw": crudo,
+        "raw": crudo if len(crudo) < 2_000_000 else None,  # los grandes solo en gzip
         "etag": hashlib.md5(crudo).hexdigest(),
     }
     _cache[rel] = entrada
+    while len(_cache) > MAX_CACHE:
+        _cache.popitem(last=False)
     return entrada
 
 def _json_gz(rel, sanitizar=False, mime="application/json"):
@@ -58,7 +64,10 @@ def _json_gz(rel, sanitizar=False, mime="application/json"):
     if request.headers.get("If-None-Match") == e["etag"]:
         return Response(status=304, headers={"ETag": e["etag"]})
     acepta_gz = "gzip" in (request.headers.get("Accept-Encoding") or "")
-    cuerpo = e["gz"] if acepta_gz else e["raw"]
+    if acepta_gz:
+        cuerpo = e["gz"]
+    else:
+        cuerpo = e["raw"] if e["raw"] is not None else gzip.decompress(e["gz"])
     h = {"ETag": e["etag"], "Cache-Control": "public, max-age=300",
          "Content-Type": mime + "; charset=utf-8"}
     if acepta_gz:
@@ -108,9 +117,15 @@ def config():
                     headers={"Content-Type": "application/json; charset=utf-8",
                              "Cache-Control": "no-store"})
 
-@app.route("/data/negocios.json")
-def negocios():
-    return _json_gz("data/negocios.json")
+@app.route("/data/zonas/index.json")
+def zonas_index():
+    return _json_gz("data/zonas/index.json")
+
+@app.route("/data/zonas/<zona>.json")
+def zona(zona):
+    if not re.fullmatch(r"[a-z0-9-]{2,40}", zona):
+        abort(404)
+    return _json_gz(f"data/zonas/{zona}.json")
 
 @app.route("/data/croquis.geojson")
 def croquis():
@@ -118,9 +133,9 @@ def croquis():
 
 @app.route("/healthz")
 def healthz():
-    e = _cargar("data/negocios.json")
-    n = len(json.loads(e["raw"])) if e else 0
-    return {"ok": True, "negocios": n}
+    ruta = os.path.join(BASE, "data", "zonas", "index.json")
+    idx = json.load(open(ruta)) if os.path.exists(ruta) else {}
+    return {"ok": True, "zonas": len(idx), "negocios": sum(v.get("n", 0) for v in idx.values())}
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=int(os.environ.get("PORT", 8765)))
