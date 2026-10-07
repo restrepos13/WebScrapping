@@ -22,7 +22,7 @@ from flask import Flask, Response, abort, redirect, request, send_from_directory
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 TOKEN = os.environ.get("RADAR_TOKEN", "")
-PAGINAS = {"index.html", "mapa.html", "tracker-prospeccion.html", "sync.js"}
+PAGINAS = {"index.html", "mapa.html", "tracker-prospeccion.html", "sync.js", "radar-comun.js"}
 
 app = Flask(__name__, static_folder=None)
 

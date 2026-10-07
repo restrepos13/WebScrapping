@@ -69,6 +69,17 @@ footer{margin-top:30px;font-size:12px;color:var(--ink3);border-top:1px solid var
 .msgtext{background:#EAF5F0;border-left:3px solid #0B6E4F;padding:12px 14px;font-size:13px;margin-top:8px;border-radius:0 10px 10px 10px;white-space:pre-wrap}
 .msgbtns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .msgbtns button.copied{border-color:#0B6E4F;color:#0B6E4F}
+.msgbtns a.wa{font-family:"Spline Sans Mono",ui-monospace,monospace;font-size:11px;font-weight:600;letter-spacing:.04em;background:#0B6E4F;color:#fff;padding:7px 10px;text-decoration:none}
+.tab.radar{border-color:var(--accent);color:var(--accent)}
+.tab.radar.active{background:var(--accent);border-color:var(--accent);color:#fff}
+#radar-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding-bottom:4px}
+#radar-bar label{font-size:12px;color:var(--ink2);display:flex;gap:6px;align-items:center}
+#radar-bar input[type=text]{width:130px}
+.pager{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:16px;font-family:"Spline Sans Mono",ui-monospace,monospace;font-size:11px;color:var(--ink3)}
+.chip.sc-hi{border-color:#1E6B45;color:#1E6B45}.chip.sc-mid{border-color:var(--accent);color:var(--accent)}
+.chip.nuevo{border-color:#B8860B;color:#B8860B}.chip.sig{border-style:dashed}
+.chip.verif{border-color:#9A3412;color:#9A3412}
+#cargando-radar{display:none;padding:30px;text-align:center;color:var(--ink3);font-family:"Spline Sans Mono",ui-monospace,monospace;font-size:12px}
 </style>
 </head>
 <body>
@@ -76,7 +87,7 @@ footer{margin-top:30px;font-size:12px;color:var(--ink3);border-top:1px solid var
 <header>
   <div>
     <h1>Tracker de Prospección <a href="mapa.html" style="font-size:13px;font-weight:600;color:var(--accent);text-decoration:none;vertical-align:middle;margin-left:8px;font-family:'Spline Sans Mono',monospace">MAPA ↗</a> <a href="index.html" style="font-size:13px;font-weight:600;color:var(--ink-3);text-decoration:none;vertical-align:middle;margin-left:6px;font-family:'Spline Sans Mono',monospace">INICIO</a></h1>
-    <p class="hint"><span id="total"></span> prospectos de los 4 radares · el progreso se guarda en este navegador · hacé respaldo JSON seguido</p>
+    <p class="hint"><span id="total"></span> prospectos · los del Radar Colombia comparten estado con el mapa · hacé respaldo JSON seguido</p>
   </div>
   <div class="counts" id="counts"></div>
 </header>
@@ -107,7 +118,20 @@ footer{margin-top:30px;font-size:12px;color:var(--ink3);border-top:1px solid var
   </div>
 </div>
 
+<div id="radar-bar">
+  <select id="f-zona" title="Ciudad"><option value="">Todas las ciudades</option></select>
+  <select id="f-cat" title="Rubro"><option value="">Todos los rubros</option></select>
+  <select id="f-orden" title="Orden">
+    <option value="score">Mayor score primero</option><option value="rev">Más reseñas</option>
+    <option value="nuevo">Más recientes (nuevos)</option><option value="nombre">Nombre A-Z</option>
+  </select>
+  <label><input type="checkbox" id="f-wa"> Con WhatsApp</label>
+  <label><input type="checkbox" id="f-vence"> Toque vencido</label>
+  <label>Tu marca <input type="text" id="marca" placeholder="[MARCA]"></label>
+</div>
+<div id="cargando-radar">cargando negocios del radar…</div>
 <div id="list"></div>
+<div class="pager" id="pager" hidden></div>
 <div class="empty" id="empty" hidden>Nada con esos filtros.</div>
 
 <footer>
@@ -116,6 +140,7 @@ footer{margin-top:30px;font-size:12px;color:var(--ink3);border-top:1px solid var
 </div>
 
 <script src="sync.js"></script>
+<script src="radar-comun.js"></script>
 <script>
 "use strict";
 // ===== Catálogo (radares sept 2026). w = WhatsApp solo dígitos, m = correo, x = canal alterno =====
@@ -320,92 +345,240 @@ function st(id){ return state[id]||(state[id]={e:"pend",n:"",h:[]}); }
 function hoy(){ return new Date().toISOString().slice(0,10); }
 function setEstado(id,e){ const s=st(id); s.e=e; s.h.push({e,f:hoy()}); persist(id); render(); }
 
+// ===== Radar Colombia: negocios del mapa, mismo estado que el mapa (app "mapa" en la base) =====
+const RC=window.RadarComun;
+let RADAR=null, ZONAS_CO={}, PAG=0;
+const POR_PAG=50;
+let EST={};
+try{EST=JSON.parse(localStorage.getItem(RC.KEY_EST)||"{}")}catch(e){}
+const saveEst=()=>{try{localStorage.setItem(RC.KEY_EST,JSON.stringify(EST))}catch(e){}};
+let SYNC_MAPA={online:false};
+const estR=id=>RC.normalizar(EST[id])||{e:"pend",n:"",h:[]};
+function persistR(id){saveEst();if(SYNC_MAPA.online&&EST[id])SYNC_MAPA.save(id,EST[id]).catch(()=>{});}
+const prioDe=sc=>sc>=60?"P1":sc>=40?"P2":"P3";
+// rubros del radar que caen en cada pestaña de nicho del listado
+const NICHO_RADAR={
+  "Clínicas":["clínica estética","clínica odontológica","dermatólogo","cirujano plástico"],
+  "Hoteles":["hotel boutique","hostal"],
+  "Webcam":["estudio webcam","agencia de modelos"],
+  "OnlyFans":[],
+};
+const SENALES={sin_web:"Sin web",web_rota:"Web rota",sin_chatbot:"Sin chatbot",sin_agendador:"Sin agenda",sin_ingles:"Sin inglés"};
+const escH=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+async function cargarRadar(){
+  if(RADAR)return RADAR;
+  $("#cargando-radar").style.display="block";
+  try{
+    const idx=await fetch("data/zonas/index.json").then(r=>r.ok?r.json():{});
+    const cfg=await fetch("config.json").then(r=>r.ok?r.json():null).catch(()=>null)
+      ||await fetch("config.public.json").then(r=>r.ok?r.json():{}).catch(()=>({}));
+    const zonas=Object.keys(idx).filter(z=>idx[z].pais==="CO");
+    zonas.forEach(z=>ZONAS_CO[z]=((cfg.zonas||{})[z]||{}).nombre||z);
+    const partes=await Promise.all(zonas.map(z=>fetch(`data/zonas/${z}.json`).then(r=>r.ok?r.json():[]).catch(()=>[])));
+    RADAR=partes.flat();
+    RADAR.forEach(n=>{n._sc=RC.score(n);n._q=[n.nombre,n.categoria,n.subzona,n.direccion,n.tel,n.wa,(n.emails||[]).join(" "),(n.registro||{}).razon_social]
+      .filter(Boolean).join(" ").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")});
+    // selects con conteos
+    const fz=$("#f-zona");zonas.forEach(z=>{const o=document.createElement("option");o.value=z;
+      o.textContent=`${ZONAS_CO[z]} (${RADAR.filter(n=>n.zona===z).length.toLocaleString("es")})`;fz.appendChild(o)});
+    const cats={};RADAR.forEach(n=>cats[n.categoria]=(cats[n.categoria]||0)+1);
+    const fc=$("#f-cat");Object.entries(cats).sort((a,b)=>b[1]-a[1]).forEach(([c,k])=>{const o=document.createElement("option");
+      o.value=c;o.textContent=`${c} (${k.toLocaleString("es")})`;fc.appendChild(o)});
+  }catch(e){RADAR=[]}
+  $("#cargando-radar").style.display="none";
+  return RADAR;
+}
+function radarFiltrado(){
+  const zona=$("#f-zona").value,cat=$("#f-cat").value,prio=$("#f-prio").value,
+        estado=fEstadoChip||$("#f-estado").value,q=$("#f-q").value.trim().toLowerCase(),
+        soloWa=$("#f-wa").checked,vence=$("#f-vence").checked;
+  const qs=q?q.normalize("NFD").replace(/[\u0300-\u036f]/g,"").split(/\s+/):null;
+  const nicho=NICHO_RADAR[fNicho];
+  const out=(RADAR||[]).filter(n=>{
+    if(nicho&&!nicho.includes(n.categoria))return false;
+    if(zona&&n.zona!==zona)return false;
+    if(cat&&n.categoria!==cat)return false;
+    if(prio&&prioDe(n._sc)!==prio)return false;
+    if(soloWa&&!n.wa)return false;
+    const s=estR(n.id);
+    if(estado&&s.e!==estado)return false;
+    if(vence){const p=RC.proximoToque(s);if(!p||p.atraso<0)return false}
+    if(qs&&!qs.every(w=>n._q.includes(w)))return false;
+    return true;
+  });
+  const o=$("#f-orden").value;
+  out.sort(o==="rev"?(a,b)=>(b.reviews||0)-(a.reviews||0):o==="nombre"?(a,b)=>a.nombre.localeCompare(b.nombre,"es")
+    :o==="nuevo"?(a,b)=>((b.nuevo||{}).fecha||"").localeCompare((a.nuevo||{}).fecha||"")||b._sc-a._sc:(a,b)=>b._sc-a._sc);
+  return out;
+}
+function setEstadoR(id,e){
+  const n=RADAR.find(x=>x.id===id);if(!n)return;
+  EST[id]=RC.mover(estR(id),n,e);persistR(id);render();
+}
+function filaRadar(n){
+  const s=estR(n.id),sc=n._sc,pr=prioDe(sc),last=s.h&&s.h.length?s.h[s.h.length-1]:null,p=RC.proximoToque(s);
+  const tel=n.tel&&!n.wa?'<div><span class="lbl">Tel</span> <a href="tel:'+escH(n.tel.replace(/[^+\d]/g,""))+'">'+escH(n.tel)+"</a></div>":"";
+  let contact="";
+  if(n.wa)contact+='<div><span class="lbl">WA</span> <a href="https://wa.me/'+n.wa+'" target="_blank" rel="noopener">+'+n.wa+"</a></div>";
+  contact+=tel;
+  (n.emails||[]).slice(0,2).forEach(m=>contact+='<div><span class="lbl">Mail</span> <a href="mailto:'+escH(m)+'">'+escH(m)+"</a></div>");
+  if(n.web)contact+='<div><span class="lbl">Web</span> <a href="'+escH(n.web)+'" target="_blank" rel="noopener">'+escH(n.web.replace(/^https?:\/\/(www\.)?/,"").replace(/[?#].*$/,"").replace(/\/$/,""))+"</a></div>";
+  if((n.redes||{}).instagram)contact+='<div><span class="lbl">IG</span> <a href="https://instagram.com/'+escH(n.redes.instagram)+'" target="_blank" rel="noopener">@'+escH(n.redes.instagram)+"</a></div>";
+  if(!contact)contact='<div class="lbl">sin canal — conseguir contacto</div>';
+  const r=n.registro;
+  const reg=r?'<div class="rmeta">RUES: '+escH(r.razon_social)+(r.nit?" · NIT "+escH(r.nit):"")+" · "+escH(r.estado||"")+(r.desde?" desde "+escH(r.desde):"")+"</div>":"";
+  const chips='<span class="chip'+(pr==="P1"?" p1":"")+'">'+pr+'</span><span class="chip">'+escH(n.categoria)+'</span>'+
+    '<span class="chip '+(sc>=60?"sc-hi":sc>=40?"sc-mid":"")+'">score '+sc+"</span>"+
+    (n.nuevo?'<span class="chip nuevo">nuevo '+escH(n.nuevo.fecha)+"</span>":"")+
+    (r&&r.confianza<0.8?'<span class="chip verif">verificar RUES</span>':"")+
+    Object.entries(SENALES).filter(([k])=>(n.senales||{})[k]).map(([,l])=>'<span class="chip sig">'+l+"</span>").join("");
+  let acts="";
+  if(RC.NEXT[s.e])acts+='<button data-r="'+RC.NEXT[s.e]+'" data-id="'+escH(n.id)+'">Registrar toque '+RC.NEXT[s.e][1]+"</button>";
+  if(!["resp","demo","neg","cli"].includes(s.e))acts+='<button data-r="resp" data-id="'+escH(n.id)+'">Respondió</button>';
+  if(s.e==="resp")acts+='<button data-r="demo" data-id="'+escH(n.id)+'">Demo</button>';
+  if(s.e==="demo")acts+='<button data-r="neg" data-id="'+escH(n.id)+'">Negociando</button>';
+  if(["resp","demo","neg"].includes(s.e))acts+='<button data-r="cli" data-id="'+escH(n.id)+'">Cliente ✓</button>';
+  if(s.e!=="desc"&&s.e!=="cli")acts+='<button data-r="desc" data-id="'+escH(n.id)+'">Descartar</button>';
+  if(s.e==="desc"||s.e==="cli")acts+='<button data-r="pend" data-id="'+escH(n.id)+'">Reabrir</button>';
+  const sig=RC.NEXT[s.e];
+  const msg=sig==="t2"||sig==="t3"?RC.toque(sig,n.nombre,n.pais,$("#marca").value.trim()):RC.mensaje(n,$("#marca").value.trim());
+  const cuando=p?' · <b style="color:'+(p.atraso>=0?"#B91C1C":"var(--ink3)")+'">'+RC.ESTADOS[p.toque].toLowerCase()+" "+(p.atraso>0?"vencido hace "+p.atraso+"d":p.atraso===0?"hoy":"el "+p.vence)+"</b>":"";
+  const mapa=`mapa.html#z=${encodeURIComponent(n.zona)}&q=${encodeURIComponent(n.nombre)}&cam=${n.lat},${n.lng},16.5`;
+  return '<div class="row'+(s.e==="desc"?" desc-state":"")+'">'+
+    '<div><div class="rname">'+escH(n.nombre)+'</div><div class="rmeta">'+escH((n.subzona||"").split(",")[0])+" · "+escH(ZONAS_CO[n.zona]||n.zona)+
+      (n.rating?" · "+n.rating+"★ ("+(n.reviews||0)+")":"")+"</div>"+reg+'<div class="chips">'+chips+"</div></div>"+
+    '<div class="contact">'+contact+"</div>"+
+    '<div class="gancho"><b>Gancho:</b> '+escH(n.gancho||"—")+(n.direccion?'<div class="rmeta">'+escH(n.direccion)+"</div>":"")+"</div>"+
+    '<div class="state-col"><span class="estado st-'+s.e+'">'+RC.ESTADOS[s.e]+"</span>"+
+      (last?'<span class="fecha">Último: '+RC.ESTADOS[last.e]+" · "+last.f+cuando+"</span>":"")+
+      '<div class="acts">'+acts+"</div>"+
+      '<textarea class="notas" data-rid="'+escH(n.id)+'" placeholder="Notas (a quién te derivaron, qué dijeron…)">'+escH(s.n||"")+"</textarea></div>"+
+    '<details class="msgbox"><summary>'+(sig==="t2"||sig==="t3"?"Mensaje del "+RC.ESTADOS[sig].toLowerCase():"Mensaje de primer contacto")+' — ver y copiar</summary>'+
+      '<div class="msgtext">'+escH(msg)+"</div>"+
+      '<div class="msgbtns">'+
+        (n.wa?'<a class="wa" target="_blank" rel="noopener" href="https://wa.me/'+n.wa+"?text="+encodeURIComponent(msg)+'">Abrir WhatsApp con el mensaje</a>':"")+
+        '<button data-copy="'+escH(n.id)+'">Copiar mensaje</button>'+
+        (sig!=="t2"&&sig!=="t3"?'<button data-tq="t2" data-id="'+escH(n.id)+'">Copiar toque 2 (72h)</button>'+
+          '<button data-tq="t3" data-id="'+escH(n.id)+'">Copiar toque 3 (día 7)</button>':"")+
+        '<a href="'+mapa+'" target="_blank" rel="noopener" style="font-size:11px;align-self:center;color:var(--accent)">Ver en el mapa ↗</a>'+
+      "</div></details>"+
+    "</div>";
+}
 // ===== Filtros =====
 const $=q=>document.querySelector(q);
 let fEstadoChip="", fNicho="";
-["f-prio","f-estado","f-q"].forEach(i=>$("#"+i).addEventListener("input",()=>{fEstadoChip="";render();}));
+["f-prio","f-estado"].forEach(i=>$("#"+i).addEventListener("input",()=>{fEstadoChip="";PAG=0;render();}));
+let tBusca;$("#f-q").addEventListener("input",()=>{clearTimeout(tBusca);tBusca=setTimeout(()=>{fEstadoChip="";PAG=0;render()},180)});
 document.querySelectorAll("#tabs .tab").forEach(t=>t.onclick=()=>{
-  fNicho=t.dataset.s;
+  fNicho=t.dataset.s;PAG=0;
   document.querySelectorAll("#tabs .tab").forEach(x=>x.classList.toggle("active",x===t));
   render();
 });
+["f-zona","f-cat","f-orden","f-wa","f-vence"].forEach(i=>$("#"+i).addEventListener("input",()=>{PAG=0;render()}));
+try{$("#marca").value=localStorage.getItem(RC.KEY_MARCA)||""}catch(e){}
+$("#marca").addEventListener("change",()=>{try{localStorage.setItem(RC.KEY_MARCA,$("#marca").value)}catch(e){};render()});
 
 function counts(){
   const c={};Object.keys(ESTADOS).forEach(k=>c[k]=0);
   P.forEach(p=>c[st(p.id).e]++);
+  (RADAR||[]).forEach(n=>c[estR(n.id).e]++);
   const el=$("#counts");el.innerHTML="";
   Object.entries(ESTADOS).forEach(([k,label])=>{
     const b=document.createElement("span");
     b.className="count"+(fEstadoChip===k?" active":"");
     b.innerHTML="<b>"+c[k]+"</b> "+label;
-    b.onclick=()=>{fEstadoChip=fEstadoChip===k?"":k;$("#f-estado").value="";render();};
+    b.onclick=()=>{fEstadoChip=fEstadoChip===k?"":k;$("#f-estado").value="";PAG=0;render();};
     el.appendChild(b);
   });
 }
 
+function filaCatalogo(p){
+  const s=st(p.id),last=s.h.length?s.h[s.h.length-1]:null;
+  let contact="";
+  if(p.w)contact+='<div><span class="lbl">WA</span> <a href="https://wa.me/'+p.w+'" target="_blank" rel="noopener">+'+p.w+"</a></div>";
+  if(p.m)contact+='<div><span class="lbl">Mail</span> <a href="mailto:'+p.m+'">'+p.m+"</a></div>";
+  if(p.x)contact+='<div><span class="lbl">Otro</span> '+p.x+"</div>";
+  if(!contact)contact='<div class="lbl">sin canal — conseguir contacto</div>';
+  let acts="";
+  if(NEXT[s.e])acts+='<button data-a="'+NEXT[s.e]+'" data-id="'+p.id+'">Registrar toque '+NEXT[s.e][1]+"</button>";
+  if(!["resp","demo","neg","cli"].includes(s.e))acts+='<button data-a="resp" data-id="'+p.id+'">Respondió</button>';
+  if(["resp"].includes(s.e))acts+='<button data-a="demo" data-id="'+p.id+'">Demo</button>';
+  if(["demo"].includes(s.e))acts+='<button data-a="neg" data-id="'+p.id+'">Negociando</button>';
+  if(["resp","demo","neg"].includes(s.e))acts+='<button data-a="cli" data-id="'+p.id+'">Cliente ✓</button>';
+  if(s.e!=="desc"&&s.e!=="cli")acts+='<button data-a="desc" data-id="'+p.id+'">Descartar</button>';
+  if(s.e==="desc"||s.e==="cli")acts+='<button data-a="pend" data-id="'+p.id+'">Reabrir</button>';
+  return '<div class="row'+(s.e==="desc"?" desc-state":"")+'">'+
+    '<div><div class="rname">'+p.n+'</div><div class="rmeta">'+p.c+"</div>"+
+    '<div class="chips"><span class="chip'+(p.p==="P1"?" p1":"")+'">'+p.p+'</span><span class="chip">'+p.s+'</span><span class="chip">'+p.t+"</span></div></div>"+
+    '<div class="contact">'+contact+"</div>"+
+    '<div class="gancho"><b>Gancho:</b> '+p.g+"</div>"+
+    '<div class="state-col"><span class="estado st-'+s.e+'">'+ESTADOS[s.e]+"</span>"+
+    (last?'<span class="fecha">Último: '+ESTADOS[last.e]+" · "+last.f+"</span>":"")+
+    '<div class="acts">'+acts+"</div>"+
+    '<textarea class="notas" data-id="'+p.id+'" placeholder="Notas (a quién te derivaron, qué dijeron…)">'+(s.n||"")+"</textarea></div>"+
+    (M[p.id]?'<details class="msgbox"><summary>Mensaje de primer contacto — ver y copiar</summary>'+
+      '<div class="msgtext">'+M[p.id]+"</div>"+
+      '<div class="msgbtns">'+
+      '<button data-c="m1" data-id="'+p.id+'">Copiar mensaje</button>'+
+      '<button data-c="t2" data-id="'+p.id+'" data-s="'+p.s+'">Copiar toque 2 (72h)</button>'+
+      '<button data-c="t3" data-id="'+p.id+'">Copiar toque 3 (día 7)</button>'+
+      "</div></details>":"")+
+    "</div>";
+}
+function catalogoFiltrado(){
+  const nicho=fNicho,prio=$("#f-prio").value,estado=fEstadoChip||$("#f-estado").value,
+        q=$("#f-q").value.trim().toLowerCase(),zona=$("#f-zona").value;
+  if($("#f-cat").value)return[];  // filtrar por rubro del radar deja solo el radar
+  const ciudad=zona?(ZONAS_CO[zona]||zona).split(/ y | ·/)[0].toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,""):"";
+  const orden={P1:0,P2:1,P3:2};
+  return [...P].sort((a,b)=>orden[a.p]-orden[b.p]||a.n.localeCompare(b.n)).filter(p=>{
+    const s=st(p.id);
+    if(nicho&&p.s!==nicho)return false;
+    if(prio&&p.p!==prio)return false;
+    if(estado&&s.e!==estado)return false;
+    if($("#f-wa").checked&&!p.w)return false;
+    if($("#f-vence").checked){const x=RC.proximoToque(s);if(!x||x.atraso<0)return false}
+    if(ciudad&&!p.c.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").includes(ciudad))return false;
+    if(q&&!(p.n+" "+p.c+" "+(p.w||"")+" "+(p.m||"")+" "+p.g).toLowerCase().includes(q))return false;
+    return true;
+  });
+}
+const copiar=async(b,txt,orig)=>{
+  let ok=false;
+  try{await navigator.clipboard.writeText(txt);ok=true;}
+  catch(e){const ta=document.createElement("textarea");ta.value=txt;document.body.appendChild(ta);
+    ta.select();try{ok=document.execCommand("copy");}catch(_){ }ta.remove();}
+  b.textContent=ok?"¡Copiado!":"No se pudo copiar";b.classList.add("copied");
+  setTimeout(()=>{b.textContent=orig;b.classList.remove("copied");},1500);
+};
 function render(){
   counts();
-  const nicho=fNicho, prio=$("#f-prio").value,
-        estado=fEstadoChip||$("#f-estado").value, q=$("#f-q").value.trim().toLowerCase();
-  const list=$("#list");list.innerHTML="";
-  let shown=0;
-  const orden={P1:0,P2:1,P3:2};
-  [...P].sort((a,b)=>orden[a.p]-orden[b.p]||a.n.localeCompare(b.n)).forEach(p=>{
-    const s=st(p.id);
-    if(nicho&&p.s!==nicho)return;
-    if(prio&&p.p!==prio)return;
-    if(estado&&s.e!==estado)return;
-    if(q&&!(p.n+" "+p.c+" "+(p.w||"")+" "+(p.m||"")+" "+p.g).toLowerCase().includes(q))return;
-    shown++;
-    const last=s.h.length?s.h[s.h.length-1]:null;
-    const row=document.createElement("div");
-    row.className="row"+(s.e==="desc"?" desc-state":"");
-    let contact="";
-    if(p.w)contact+='<div><span class="lbl">WA</span> <a href="https://wa.me/'+p.w+'" target="_blank" rel="noopener">+'+p.w+"</a></div>";
-    if(p.m)contact+='<div><span class="lbl">Mail</span> <a href="mailto:'+p.m+'">'+p.m+"</a></div>";
-    if(p.x)contact+='<div><span class="lbl">Otro</span> '+p.x+"</div>";
-    if(!contact)contact='<div class="lbl">sin canal — conseguir contacto</div>';
-    let acts="";
-    if(NEXT[s.e])acts+='<button data-a="'+NEXT[s.e]+'" data-id="'+p.id+'">Registrar toque '+NEXT[s.e][1]+"</button>";
-    if(!["resp","demo","neg","cli"].includes(s.e))acts+='<button data-a="resp" data-id="'+p.id+'">Respondió</button>';
-    if(["resp"].includes(s.e))acts+='<button data-a="demo" data-id="'+p.id+'">Demo</button>';
-    if(["demo"].includes(s.e))acts+='<button data-a="neg" data-id="'+p.id+'">Negociando</button>';
-    if(["resp","demo","neg"].includes(s.e))acts+='<button data-a="cli" data-id="'+p.id+'">Cliente ✓</button>';
-    if(s.e!=="desc"&&s.e!=="cli")acts+='<button data-a="desc" data-id="'+p.id+'">Descartar</button>';
-    if(s.e==="desc"||s.e==="cli")acts+='<button data-a="pend" data-id="'+p.id+'">Reabrir</button>';
-    row.innerHTML=
-      '<div><div class="rname">'+p.n+'</div><div class="rmeta">'+p.c+"</div>"+
-      '<div class="chips"><span class="chip'+(p.p==="P1"?" p1":"")+'">'+p.p+'</span><span class="chip">'+p.s+'</span><span class="chip">'+p.t+"</span></div></div>"+
-      '<div class="contact">'+contact+"</div>"+
-      '<div class="gancho"><b>Gancho:</b> '+p.g+"</div>"+
-      '<div class="state-col"><span class="estado st-'+s.e+'">'+ESTADOS[s.e]+"</span>"+
-      (last?'<span class="fecha">Último: '+ESTADOS[last.e]+" · "+last.f+"</span>":"")+
-      '<div class="acts">'+acts+"</div>"+
-      '<textarea class="notas" data-id="'+p.id+'" placeholder="Notas (a quién te derivaron, qué dijeron…)">'+(s.n||"")+"</textarea></div>"+
-      (M[p.id]?'<details class="msgbox"><summary>Mensaje de primer contacto — ver y copiar</summary>'+
-        '<div class="msgtext">'+M[p.id]+"</div>"+
-        '<div class="msgbtns">'+
-        '<button data-c="m1" data-id="'+p.id+'">Copiar mensaje</button>'+
-        '<button data-c="t2" data-id="'+p.id+'" data-s="'+p.s+'">Copiar toque 2 (72h)</button>'+
-        '<button data-c="t3" data-id="'+p.id+'">Copiar toque 3 (día 7)</button>'+
-        "</div></details>":"");
-    list.appendChild(row);
-  });
-  $("#empty").hidden=shown>0;
+  const cat=catalogoFiltrado(),rad=RADAR?radarFiltrado():[];
+  const items=cat.map(p=>["p",p]).concat(rad.map(n=>["r",n]));
+  const total=items.length,pags=Math.max(1,Math.ceil(total/POR_PAG));
+  if(PAG>=pags)PAG=pags-1;
+  const list=$("#list");
+  list.innerHTML=items.slice(PAG*POR_PAG,(PAG+1)*POR_PAG).map(([t,x])=>t==="p"?filaCatalogo(x):filaRadar(x)).join("");
+  $("#empty").hidden=total>0;
+  const pg=$("#pager");pg.hidden=total<=POR_PAG;
+  pg.innerHTML=`<button id="pg-prev"${PAG?"":" disabled"}>← Anterior</button>
+    <span>${(PAG*POR_PAG+1).toLocaleString("es")}–${Math.min(total,(PAG+1)*POR_PAG).toLocaleString("es")} de ${total.toLocaleString("es")}</span>
+    <button id="pg-next"${PAG<pags-1?"":" disabled"}>Siguiente →</button>`;
+  const ir=d=>{PAG+=d;render();window.scrollTo({top:$("#list").offsetTop-90})};
+  $("#pg-prev").onclick=()=>ir(-1);$("#pg-next").onclick=()=>ir(1);
+  const universo=P.length+(RADAR?RADAR.length:0);
+  $("#total").textContent=total===universo?universo.toLocaleString("es"):`${total.toLocaleString("es")} de ${universo.toLocaleString("es")}`;
+  // catálogo curado
   list.querySelectorAll("button[data-a]").forEach(b=>b.onclick=()=>setEstado(b.dataset.id,b.dataset.a));
-  list.querySelectorAll(".notas").forEach(t=>t.onchange=()=>{st(t.dataset.id).n=t.value;persist(t.dataset.id);});
-  list.querySelectorAll("button[data-c]").forEach(b=>b.onclick=async()=>{
-    const txt=b.dataset.c==="m1"?M[b.dataset.id]:b.dataset.c==="t2"?T2[b.dataset.s]:T3;
-    let ok=false;
-    try{await navigator.clipboard.writeText(txt);ok=true;}
-    catch(e){
-      const ta=document.createElement("textarea");ta.value=txt;document.body.appendChild(ta);
-      ta.select();try{ok=document.execCommand("copy");}catch(_){ }ta.remove();
-    }
-    const orig=b.textContent;
-    b.textContent=ok?"¡Copiado!":"No se pudo copiar";b.classList.add("copied");
-    setTimeout(()=>{b.textContent=orig;b.classList.remove("copied");},1500);
-  });
+  list.querySelectorAll("textarea[data-id]").forEach(t=>t.onchange=()=>{st(t.dataset.id).n=t.value;persist(t.dataset.id);});
+  list.querySelectorAll("button[data-c]").forEach(b=>b.onclick=()=>copiar(b,b.dataset.c==="m1"?M[b.dataset.id]:b.dataset.c==="t2"?T2[b.dataset.s]:T3,b.textContent));
+  // radar (estado compartido con el mapa)
+  list.querySelectorAll("button[data-r]").forEach(b=>b.onclick=()=>setEstadoR(b.dataset.id,b.dataset.r));
+  list.querySelectorAll("textarea[data-rid]").forEach(t=>t.onchange=()=>{const id=t.dataset.rid;EST[id]={...estR(id),n:t.value};persistR(id);});
+  list.querySelectorAll("button[data-copy]").forEach(b=>b.onclick=()=>copiar(b,b.closest(".msgbox").querySelector(".msgtext").textContent,"Copiar mensaje"));
+  list.querySelectorAll("button[data-tq]").forEach(b=>b.onclick=()=>{const n=RADAR.find(x=>x.id===b.dataset.id);
+    copiar(b,RC.toque(b.dataset.tq,n.nombre,n.pais,$("#marca").value.trim()),b.textContent)});
 }
 
 // ===== Export / Import =====
@@ -414,23 +587,33 @@ function dl(name,content,type){
   a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),5000);
 }
-$("#btn-export").onclick=()=>dl("tracker-respaldo-"+hoy()+".json",JSON.stringify(state,null,1),"application/json");
+$("#btn-export").onclick=()=>dl("tracker-respaldo-"+hoy()+".json",JSON.stringify({...state,__mapa:EST},null,1),"application/json");
 $("#btn-import").onclick=()=>$("#file-import").click();
 $("#file-import").onchange=e=>{
   const f=e.target.files[0];if(!f)return;
-  f.text().then(t=>{try{state=JSON.parse(t);save();render();if(SYNC.online)SYNC.saveMany(Object.keys(state).map(id=>({id,data:state[id]}))).catch(()=>{});}catch(err){alert("JSON inválido");}});
+  f.text().then(t=>{try{
+    const d=JSON.parse(t);
+    if(d.__mapa){Object.assign(EST,d.__mapa);saveEst();
+      if(SYNC_MAPA.online)SYNC_MAPA.saveMany(Object.keys(d.__mapa).map(id=>({id,data:d.__mapa[id]}))).catch(()=>{});delete d.__mapa;}
+    state=d;save();render();if(SYNC.online)SYNC.saveMany(Object.keys(state).map(id=>({id,data:state[id]}))).catch(()=>{});
+  }catch(err){alert("JSON inválido");}});
   e.target.value="";
 };
 $("#btn-csv").onclick=()=>{
   const esc=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
-  let csv="﻿Nombre;Nicho;Ciudad;Tier;Prioridad;WhatsApp;Correo;Otro canal;Gancho;Estado;Última acción;Fecha;Notas;Mensaje 1er contacto\n";
-  P.forEach(p=>{const s=st(p.id);const last=s.h.length?s.h[s.h.length-1]:null;
-    csv+=[p.n,p.s,p.c,p.t,p.p,p.w?"+"+p.w:"",p.m||"",p.x||"",p.g,ESTADOS[s.e],last?ESTADOS[last.e]:"",last?last.f:"",s.n||"",M[p.id]||""].map(esc).join(";")+"\n";});
-  dl("tracker-prospeccion-"+hoy()+".csv",csv,"text/csv;charset=utf-8");
+  let csv="\ufeffNombre;Nicho / rubro;Ciudad;Barrio o zona;Dirección;WhatsApp;Teléfono;Correo;Web;Otro canal;Prioridad;Score;Razón social RUES;NIT;Gancho;Estado;Última acción;Fecha;Notas;Mensaje 1er contacto;Origen\n";
+  catalogoFiltrado().forEach(p=>{const s=st(p.id),last=s.h.length?s.h[s.h.length-1]:null;
+    csv+=[p.n,p.s,p.c,"","",p.w?"+"+p.w:"","",p.m||"","",p.x||"",p.p,"","","",p.g,ESTADOS[s.e],last?ESTADOS[last.e]:"",last?last.f:"",s.n||"",M[p.id]||"","Catálogo"].map(esc).join(";")+"\n";});
+  (RADAR?radarFiltrado():[]).forEach(n=>{const s=estR(n.id),last=s.h&&s.h.length?s.h[s.h.length-1]:null,r=n.registro||{};
+    csv+=[n.nombre,n.categoria,ZONAS_CO[n.zona]||n.zona,(n.subzona||"").split(",")[0],n.direccion||"",n.wa?"+"+n.wa:"",n.tel||"",(n.emails||[]).join(" "),n.web||"",
+      (n.redes||{}).instagram?"IG @"+n.redes.instagram:"",prioDe(n._sc),n._sc,r.razon_social||"",r.nit||"",n.gancho||"",RC.ESTADOS[s.e],
+      last?RC.ESTADOS[last.e]:"",last?last.f:"",s.n||"",RC.mensaje(n,$("#marca").value.trim()),"Radar (mapa)"].map(esc).join(";")+"\n";});
+  dl("listado-campana-"+hoy()+".csv",csv,"text/csv;charset=utf-8");
 };
 
 document.getElementById("total").textContent=P.length;
 render();
+cargarRadar().then(()=>render());
 (async()=>{
   if(!window.RadarSync)return;
   fetch("healthz").catch(()=>{});
@@ -441,6 +624,7 @@ render();
   }
   if(!cfg||!cfg.supabase_url)return;
   SYNC=await RadarSync.init(cfg,"tracker",state,m=>{state=m;save();render();});
+  SYNC_MAPA=await RadarSync.init(cfg,"mapa",EST,m=>{EST=m;saveEst();render();});
 })();
 </script>
 </body>
