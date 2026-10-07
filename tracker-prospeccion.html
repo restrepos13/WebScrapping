@@ -363,9 +363,46 @@ const NICHO_RADAR={
   "Webcam":["estudio webcam","agencia de modelos"],
   "OnlyFans":[],
 };
+// pestañas extra: el resto de rubros del radar (las que no caen en los 4 nichos originales)
+const RUBROS_TABS=[
+  ["Estética y spa",["centro de estética","spa","óptica"]],
+  ["Peluquerías y barberías",["salón de belleza","barbería"]],
+  ["Gimnasios",["gimnasio"]],
+  ["Restaurantes",["restaurante"]],
+  ["Inmobiliarias",["inmobiliaria"]],
+  ["Automotor",["concesionario de carros","concesionario de motos","CDA y talleres"]],
+  ["Energía solar",["energía solar"]],
+  ["Muebles y cocinas",["muebles y cocinas"]],
+  ["Ferretería y materiales",["ferretería y materiales"]],
+  ["Seguros",["agencia de seguros"]],
+  ["Educación",["academia de idiomas","escuela de conducción"]],
+  ["Agencias de viaje",["agencia de viajes"]],
+  ["Veterinarias",["veterinaria"]],
+  ["Otros",[]],  // se llena con los rubros que no estén en ninguna pestaña
+];
+RUBROS_TABS.forEach(([k,cats])=>NICHO_RADAR[k]=cats);
+function pestanas(){
+  const cont=$("#tabs");
+  const cuenta=k=>(k===""?P.length+(RADAR||[]).length
+    :P.filter(p=>p.s===k).length+(RADAR||[]).filter(n=>(NICHO_RADAR[k]||[]).includes(n.categoria)).length);
+  const etiquetas={"":"Todos","Webcam":"Agencias webcam","OnlyFans":"Chatters (OnlyFans)","Clínicas":"Clínicas","Hoteles":"Hoteles"};
+  RUBROS_TABS.forEach(([k])=>etiquetas[k]=k);
+  // los rubros que no tengan negocios no salen (ni en la próxima ciudad que se sume)
+  const claves=Object.keys(etiquetas).filter(k=>k===""||cuenta(k)>0);
+  cont.innerHTML=claves.map(k=>`<button class="tab${k===fNicho?" active":""}" data-s="${escH(k)}">${escH(etiquetas[k])} <span style="opacity:.6;font-weight:500">${cuenta(k).toLocaleString("es")}</span></button>`).join("");
+  cont.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
+    fNicho=t.dataset.s;PAG=0;
+    cont.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===t));
+    render();
+  });
+}
 const SENALES={sin_web:"Sin web",web_rota:"Web rota",sin_chatbot:"Sin chatbot",sin_agendador:"Sin agenda",sin_ingles:"Sin inglés"};
 const escH=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
+function completarOtros(){
+  const cubiertas=new Set(Object.values(NICHO_RADAR).flat());
+  NICHO_RADAR["Otros"].push(...new Set((RADAR||[]).map(n=>n.categoria).filter(c=>!cubiertas.has(c))));
+}
 async function cargarRadar(){
   if(RADAR)return RADAR;
   $("#cargando-radar").style.display="block";
@@ -470,11 +507,7 @@ const $=q=>document.querySelector(q);
 let fEstadoChip="", fNicho="";
 ["f-prio","f-estado"].forEach(i=>$("#"+i).addEventListener("input",()=>{fEstadoChip="";PAG=0;render();}));
 let tBusca;$("#f-q").addEventListener("input",()=>{clearTimeout(tBusca);tBusca=setTimeout(()=>{fEstadoChip="";PAG=0;render()},180)});
-document.querySelectorAll("#tabs .tab").forEach(t=>t.onclick=()=>{
-  fNicho=t.dataset.s;PAG=0;
-  document.querySelectorAll("#tabs .tab").forEach(x=>x.classList.toggle("active",x===t));
-  render();
-});
+pestanas();
 ["f-zona","f-cat","f-orden","f-wa","f-vence"].forEach(i=>$("#"+i).addEventListener("input",()=>{PAG=0;render()}));
 try{$("#marca").value=localStorage.getItem(RC.KEY_MARCA)||""}catch(e){}
 $("#marca").addEventListener("change",()=>{try{localStorage.setItem(RC.KEY_MARCA,$("#marca").value)}catch(e){};render()});
@@ -613,7 +646,7 @@ $("#btn-csv").onclick=()=>{
 
 document.getElementById("total").textContent=P.length;
 render();
-cargarRadar().then(()=>render());
+cargarRadar().then(()=>{completarOtros();pestanas();render()});
 (async()=>{
   if(!window.RadarSync)return;
   fetch("healthz").catch(()=>{});
