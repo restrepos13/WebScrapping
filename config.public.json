@@ -197,7 +197,17 @@
         2.1686
       ],
       "zoom": 10,
-      "iso": "ES-B"
+      "iso": "ES-B",
+      "subzonas": [
+        "Eixample, Barcelona, España",
+        "Ciutat Vella, Barcelona, España",
+        "Gràcia, Barcelona, España",
+        "Sarrià-Sant Gervasi, Barcelona, España",
+        "Les Corts, Barcelona, España",
+        "Sant Martí, Barcelona, España",
+        "Sants-Montjuïc, Barcelona, España",
+        "L'Hospitalet de Llobregat, Barcelona, España"
+      ]
     },
     "es-bizkaia": {
       "nombre": "Bizkaia",
@@ -427,7 +437,17 @@
         -3.7038
       ],
       "zoom": 10,
-      "iso": "ES-M"
+      "iso": "ES-M",
+      "subzonas": [
+        "Centro, Madrid, España",
+        "Salamanca, Madrid, España",
+        "Chamberí, Madrid, España",
+        "Retiro, Madrid, España",
+        "Moncloa-Aravaca, Madrid, España",
+        "Tetuán, Madrid, España",
+        "Ciudad Lineal, Madrid, España",
+        "Carabanchel, Madrid, España"
+      ]
     },
     "es-malaga": {
       "nombre": "Málaga",

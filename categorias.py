@@ -117,12 +117,19 @@ def etiqueta(cat, pais):
     return cat
 
 def consultas_google(pais, base_co):
-    """Pares (categoría canónica, texto de búsqueda) para scan.py."""
+    """Pares (categoría canónica, texto de búsqueda) para scan.py.
+
+    En Colombia se busca con el nombre canónico de config.json. En España y
+    Texas hay que buscar el texto local de CADA categoría: antes se excluían
+    las que ya estaban en la lista de Colombia, así que fuera de CO solo se
+    barría "estudio de arquitectura".
+    """
     pares = [(c, c) for c in base_co] if pais == "CO" else []
     for k, v in CATEGORIAS.items():
         q = v.get("q", {}).get(pais)
-        if q and k not in base_co:
-            pares += [(k, t) for t in (q if isinstance(q, list) else [q])]
+        if not q or (pais == "CO" and k in base_co):
+            continue
+        pares += [(k, t) for t in (q if isinstance(q, list) else [q])]
     return pares
 
 # ---------------- OpenStreetMap ----------------

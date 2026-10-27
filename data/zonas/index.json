@@ -44,6 +44,11 @@
   "n": 5,
   "actualizado": "2026-10-05"
  },
+ "es-barcelona": {
+  "pais": "ES",
+  "n": 4755,
+  "actualizado": "2026-10-27"
+ },
  "es-burgos": {
   "pais": "ES",
   "n": 2,
@@ -81,8 +86,9 @@
  },
  "es-madrid": {
   "pais": "ES",
-  "n": 9,
-  "actualizado": "2026-10-05"
+  "n": 18287,
+  "actualizado": "2026-10-27",
+  "osm": "2026-10-27"
  },
  "es-malaga": {
   "pais": "ES",
