@@ -5,7 +5,8 @@
     { "source": "/healthz", "destination": "https://radar-nocturno.onrender.com/healthz" },
     { "source": "/api/:path*", "destination": "https://radar-nocturno.onrender.com/api/:path*" },
     { "source": "/login", "destination": "https://radar-nocturno.onrender.com/login" },
-    { "source": "/accesos", "destination": "https://radar-nocturno.onrender.com/accesos" }
+    { "source": "/accesos", "destination": "https://radar-nocturno.onrender.com/accesos" },
+    { "source": "/tracker-prospeccion.html", "destination": "https://radar-nocturno.onrender.com/tracker-prospeccion.html" }
   ],
   "redirects": [
     { "source": "/:archivo(.*\\.py)", "destination": "/", "permanent": false },
