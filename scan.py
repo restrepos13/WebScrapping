@@ -29,11 +29,16 @@ FIELD_MASK = ",".join([
     "places.internationalPhoneNumber", "places.types",
     "places.businessStatus", "nextPageToken",
 ])
-IDIOMA = {"CO": "es", "ES": "es", "TX": "en"}
-REGION = {"CO": "co", "ES": "es", "TX": "us"}
+IDIOMA = {"CO": "es", "ES": "es", "TX": "en", "FL": "en"}
+REGION = {"CO": "co", "ES": "es", "TX": "us", "FL": "us"}
 
-def search_text(key, query, pais, page_token=None):
+def search_text(key, query, pais, page_token=None, centro=None):
     body = {"textQuery": query, "languageCode": IDIOMA[pais], "regionCode": REGION[pais], "pageSize": 20}
+    if centro:
+        # sesgo (no restricción) al centro de la zona: Google tiende a devolver
+        # negocios homónimos de otra ciudad/país cuando la búsqueda es ambigua.
+        body["locationBias"] = {"circle": {
+            "center": {"latitude": centro[0], "longitude": centro[1]}, "radius": 50000.0}}
     if page_token:
         body["pageToken"] = page_token
     req = urllib.request.Request(
@@ -52,8 +57,9 @@ def search_text(key, query, pais, page_token=None):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--zona", help="clave de zona de config.json (ej. medellin, es-malaga, tx-capital)")
-    ap.add_argument("--pais", choices=["CO", "ES", "TX"])
+    ap.add_argument("--pais", choices=["CO", "ES", "TX", "FL"])
     ap.add_argument("--cat", help="una sola categoría (nombre canónico, ej. 'clínica estética')")
+    ap.add_argument("--subzonas", help="lista separada por | para barrer solo esas subzonas de la zona")
     ap.add_argument("--paginas", type=int, default=3, help="páginas por consulta (20 c/u, máx 3)")
     ap.add_argument("--max-consultas", type=int, default=900, help="tope duro de consultas (default 900 ≈ cupo gratis)")
     ap.add_argument("--si", action="store_true", help="no pedir confirmación")
@@ -72,7 +78,7 @@ def main():
     for zkey, zona in zonas.items():
         pais = zona.get("pais", "CO")
         cats = [c for c in consultas_google(pais, cfg.get("categorias", [])) if not args.cat or c[0] == args.cat]
-        for sub in subzonas(zkey, zona):
+        for sub in (args.subzonas.split("|") if args.subzonas else subzonas(zkey, zona)):
             for cat, texto in cats:
                 plan.append((zkey, pais, sub, cat, texto))
     paginas = max(1, min(args.paginas, 3))
@@ -90,13 +96,13 @@ def main():
         if zkey not in fusiones:
             fusiones[zkey] = Fusion(cargar_zona(zkey))
         fusion = fusiones[zkey]
-        query = f"{texto} en {sub}" if pais != "TX" else f"{texto} in {sub}"
+        query = f"{texto} in {sub}" if pais in ("TX", "FL") else f"{texto} en {sub}"
         token = None
         for _ in range(paginas):
             if consultas >= args.max_consultas:
                 break
             try:
-                res = search_text(key, query, pais, token)
+                res = search_text(key, query, pais, token, zona.get("centro"))
             except urllib.error.HTTPError as e:
                 print(f"  !! {query}: HTTP {e.code} {e.read().decode()[:200]}")
                 break

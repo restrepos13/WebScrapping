@@ -108,9 +108,9 @@ CATEGORIAS = {
 NAICS_A_CAT = {c: k for k, v in CATEGORIAS.items() for c in v["naics"]}
 
 def etiqueta(cat, pais):
-    """Nombre a mostrar: en Texas en inglés, en España el término local."""
+    """Nombre a mostrar: en EE.UU. (Texas/Florida) en inglés, en España el término local."""
     v = CATEGORIAS.get(cat, {})
-    if pais == "TX":
+    if pais in ("TX", "FL"):
         return v.get("en", cat)
     if pais == "ES":
         return v.get("q", {}).get("ES", cat)
@@ -120,13 +120,16 @@ def consultas_google(pais, base_co):
     """Pares (categoría canónica, texto de búsqueda) para scan.py.
 
     En Colombia se busca con el nombre canónico de config.json. En España y
-    Texas hay que buscar el texto local de CADA categoría: antes se excluían
+    EE.UU. hay que buscar el texto local de CADA categoría: antes se excluían
     las que ya estaban en la lista de Colombia, así que fuera de CO solo se
     barría "estudio de arquitectura".
+
+    Florida usa los mismos textos en inglés que Texas salvo que defina un
+    "q" propio para FL (Miami es bilingüe: se puede afinar por rubro).
     """
     pares = [(c, c) for c in base_co] if pais == "CO" else []
     for k, v in CATEGORIAS.items():
-        q = v.get("q", {}).get(pais)
+        q = v.get("q", {}).get(pais) or (v.get("q", {}).get("TX") if pais == "FL" else None)
         if not q or (pais == "CO" and k in base_co):
             continue
         pares += [(k, t) for t in (q if isinstance(q, list) else [q])]

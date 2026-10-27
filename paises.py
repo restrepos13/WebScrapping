@@ -16,6 +16,7 @@ PAISES = {
     "CO": {"nombre": "Colombia", "idioma": "es", "prefijo": "57", "registro": "RUES"},
     "ES": {"nombre": "España", "idioma": "es", "prefijo": "34", "registro": "BORME"},
     "TX": {"nombre": "Texas (EE.UU.)", "idioma": "en", "prefijo": "1", "registro": "Texas Comptroller"},
+    "FL": {"nombre": "Florida (EE.UU.)", "idioma": "en", "prefijo": "1", "registro": "Sunbiz"},
 }
 
 # clave → (nombre, código ISO 3166-2 que usa OSM, título en el BORME, capital [lat, lng])

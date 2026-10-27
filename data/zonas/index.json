@@ -6,8 +6,8 @@
  },
  "bucaramanga": {
   "pais": "CO",
-  "n": 1697,
-  "actualizado": "2026-10-05"
+  "n": 3918,
+  "actualizado": "2026-10-27"
  },
  "cali": {
   "pais": "CO",
@@ -116,10 +116,15 @@
   "n": 4,
   "actualizado": "2026-10-05"
  },
+ "fl-miami": {
+  "pais": "FL",
+  "n": 5103,
+  "actualizado": "2026-10-27"
+ },
  "medellin": {
   "pais": "CO",
-  "n": 7700,
-  "actualizado": "2026-10-05"
+  "n": 10058,
+  "actualizado": "2026-10-27"
  },
  "pereira": {
   "pais": "CO",

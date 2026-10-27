@@ -92,7 +92,7 @@ def registro(el, zona, pais):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--pais", choices=["CO", "ES", "TX"])
+    ap.add_argument("--pais", choices=["CO", "ES", "TX", "FL"])
     ap.add_argument("--zona")
     ap.add_argument("--saltar-hechas", action="store_true", help="omite zonas que ya tienen datos de OSM")
     args = ap.parse_args()

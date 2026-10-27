@@ -56,7 +56,7 @@ def fetch(url):
         return "", "muerta"
 
 def gancho_de(n, s):
-    if n.get("pais") == "TX":
+    if n.get("pais") in ("TX", "FL"):
         return gancho_en(n, s)
     cat = etiqueta(n.get("categoria", "negocio"), n.get("pais", "CO"))
     pitch = CATEGORIAS.get(n.get("categoria"), {}).get("pitch")
@@ -98,7 +98,7 @@ def gancho_en(n, s):
         (" + booking" if s.get("sin_agendador") else "") + "."
 
 def idioma(n, html):
-    if n.get("pais") == "TX":
+    if n.get("pais") in ("TX", "FL"):
         return {"sin_espanol": not ('lang="es' in html or "/es/" in html or ">español<" in html
                                     or ">espanol<" in html or 'hreflang="es' in html)}
     return {"sin_ingles": not ('lang="en"' in html or "/en/" in html or ">english<" in html or 'hreflang="en' in html)}
@@ -111,7 +111,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--max", type=int, default=100000)
-    ap.add_argument("--pais", choices=["CO", "ES", "TX"])
+    ap.add_argument("--pais", choices=["CO", "ES", "TX", "FL"])
     ap.add_argument("--zona")
     args = ap.parse_args()
 
@@ -125,7 +125,7 @@ def main():
             n["senales"] = {"sin_web": False, "sin_contacto": not (n.get("tel") or n.get("emails")), "tiene_wa": bool(n.get("wa"))}
             if not n.get("gancho") or n["gancho"].startswith(("Sin sitio web", "No website")):
                 n["gancho"] = n.get("gancho") if n.get("nuevo") and n.get("gancho") else (
-                    "No public contact data yet — look it up on Google Maps or visit in person." if n.get("pais") == "TX"
+                    "No public contact data yet — look it up on Google Maps or visit in person." if n.get("pais") in ("TX", "FL")
                     else "Sin datos de contacto públicos todavía: buscar en Google Maps o visita presencial.")
             n["auditado"] = True
         elif not web:

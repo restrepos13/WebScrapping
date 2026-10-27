@@ -241,7 +241,7 @@ const FILTROS=[
   {k:"sin_chatbot",  label:"Sin chatbot",      color:"#F2F6FF"},
   {k:"sin_agendador",label:"Sin agendamiento", color:"#00E5FF"},
   {k:"sin_ingles",   label:"Sin inglés",       color:"#C438FF", paises:["CO","ES"]},
-  {k:"sin_espanol",  label:"Sin español",      color:"#C438FF", paises:["TX"]},
+  {k:"sin_espanol",  label:"Sin español",      color:"#C438FF", paises:["TX","FL"]},
   {k:"nuevo",        label:"Recién creados",   color:"#FFD700"},
 ];
 const filtrosPais=()=>FILTROS.filter(f=>!f.paises||f.paises.includes(paisActivo()));
@@ -340,6 +340,7 @@ function colorDe(n){
   return{c:AMBER,dim:true};
 }
 function visible(n){
+  if(n.ruido)return false; // marcado por limpieza.py (centro comercial, gran superficie…)
   if(zonaActiva&&n.zona!==zonaActiva)return false;
   if(catSel.size&&!catSel.has(n.categoria))return false;
   if(F.q&&!F.q.every(w=>textoDe(n).includes(w)))return false;
@@ -373,6 +374,7 @@ function featureCollection(){
   const feats=[];let enZona=0,vis=0,cont=0;const etapas={};
   NEGOCIOS.forEach((n,i)=>{
     if(zonaActiva&&n.zona!==zonaActiva)return;
+    if(n.ruido)return;
     enZona++;
     const e=est(n.id).e;if(e!=="pend"&&e!=="desc")cont++;
     etapas[e]=(etapas[e]||0)+1;
@@ -387,13 +389,13 @@ function featureCollection(){
   $("#st-match").textContent=vis;
   $("#st-cont").textContent=cont;
   renderEmbudo(etapas,enZona);
-  const enZ=NEGOCIOS.filter(n=>n.zona===zonaActiva);
+  const enZ=NEGOCIOS.filter(n=>!n.ruido&&n.zona===zonaActiva);
   CONTACTO.forEach(c=>{const el=document.getElementById("cn-"+c.k);if(el)el.textContent=enZ.filter(c.ok).length});
   GRUPOS_EST.forEach(g=>{const el=document.getElementById("cn-"+g.k);if(!el)return;
     el.textContent=g.k==="vence"?enZ.filter(n=>{const p=proximoToque(est(n.id));return p&&p.atraso>=0}).length
       :g.es.reduce((a,e)=>a+(etapas[e]||0),0)});
   FILTROS.forEach(f=>{const el=document.getElementById("cnt-"+f.k);
-    if(el)el.textContent=NEGOCIOS.filter(n=>(!zonaActiva||n.zona===zonaActiva)&&senal(n,f.k)).length;
+    if(el)el.textContent=NEGOCIOS.filter(n=>!n.ruido&&(!zonaActiva||n.zona===zonaActiva)&&senal(n,f.k)).length;
     const b=document.getElementById("fb-"+f.k);if(b)b.style.display=filtrosPais().includes(f)?"":"none"});
   return{type:"FeatureCollection",features:feats};
 }
@@ -494,7 +496,7 @@ function popupHtml(n){
     <textarea id="pp-notas" placeholder="Notas…">${esc(e.n)}</textarea>
     <div class="bots">
       ${n.wa?`<a class="bt wa" id="pp-wa" target="_blank" rel="noopener">WhatsApp con mensaje</a>`:""}
-      ${!n.wa&&n.pais==="TX"&&n.tel?`<a class="bt wa" id="pp-sms">SMS</a>`:""}
+      ${!n.wa&&(n.pais==="TX"||n.pais==="FL")&&n.tel?`<a class="bt wa" id="pp-sms">SMS</a>`:""}
       ${(n.emails||[]).length?`<a class="bt" id="pp-mail">Email</a>`:""}
       <button class="bt" id="pp-copy">Copiar mensaje</button>
       ${n.web?`<button class="bt" id="pp-audit" title="Ver señales crudas">Señales</button>`:""}
@@ -588,7 +590,7 @@ function exportJSON(lista,nombre){
   toast(`${lista.length} negocios exportados`);
 }
 async function copiarTels(lista){
-  const tels=[...new Set(lista.filter(n=>n.wa||n.tel).map(n=>n.wa?"+"+n.wa:n.pais==="TX"?"+1"+n.tel.replace(/\D/g,"").slice(-10):n.tel))];
+  const tels=[...new Set(lista.filter(n=>n.wa||n.tel).map(n=>n.wa?"+"+n.wa:(n.pais==="TX"||n.pais==="FL")?"+1"+n.tel.replace(/\D/g,"").slice(-10):n.tel))];
   try{await navigator.clipboard.writeText(tels.join("\n"));toast(`${tels.length} teléfonos copiados`)}catch(e){toast("No se pudo copiar")}
 }
 

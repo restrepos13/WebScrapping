@@ -15,7 +15,17 @@
         "Envigado, Antioquia",
         "Itagüí, Antioquia",
         "Sabaneta, Antioquia",
-        "Bello, Antioquia"
+        "Bello, Antioquia",
+        "La América, Medellín",
+        "Robledo, Medellín",
+        "Castilla, Medellín",
+        "Aranjuez, Medellín",
+        "Buenos Aires, Medellín",
+        "Guayabal, Medellín",
+        "Villa Hermosa, Medellín",
+        "Manrique, Medellín",
+        "Provenza, Medellín",
+        "Ciudad del Río, Medellín"
       ],
       "pais": "CO"
     },
@@ -746,6 +756,27 @@
         -101.6
       ],
       "zoom": 7
+    },
+    "fl-miami": {
+      "nombre": "Miami",
+      "pais": "FL",
+      "centro": [
+        25.7617,
+        -80.1918
+      ],
+      "zoom": 10,
+      "subzonas": [
+        "Brickell, Miami, FL",
+        "Downtown Miami, FL",
+        "Miami Beach, FL",
+        "Wynwood, Miami, FL",
+        "Coral Gables, FL",
+        "Little Havana, Miami, FL",
+        "Doral, FL",
+        "Hialeah, FL",
+        "Aventura, FL",
+        "Kendall, Miami, FL"
+      ]
     }
   },
   "categorias": [
@@ -792,6 +823,12 @@
       "idioma": "en",
       "prefijo": "1",
       "registro": "Texas Comptroller"
+    },
+    "FL": {
+      "nombre": "Florida (EE.UU.)",
+      "idioma": "en",
+      "prefijo": "1",
+      "registro": "Sunbiz"
     }
   },
   "etiquetas": {
@@ -804,6 +841,35 @@
       "escuela de conducción": "autoescuela"
     },
     "TX": {
+      "clínica estética": "med spa / aesthetic clinic",
+      "clínica odontológica": "dental clinic",
+      "dermatólogo": "dermatologist",
+      "cirujano plástico": "plastic surgeon",
+      "veterinaria": "veterinary clinic",
+      "barbería": "barbershop",
+      "salón de belleza": "hair salon",
+      "gimnasio": "gym",
+      "inmobiliaria": "real estate agency",
+      "concesionario de motos": "motorcycle dealer",
+      "concesionario de carros": "car dealer",
+      "hotel boutique": "hotel",
+      "hostal": "hostel / B&B",
+      "academia de idiomas": "language school",
+      "escuela de conducción": "driving school",
+      "agencia de viajes": "travel agency",
+      "óptica": "optician",
+      "centro de estética": "beauty salon",
+      "estudio webcam": "webcam studio",
+      "agencia de modelos": "model agency",
+      "restaurante": "restaurant",
+      "energía solar": "solar installer",
+      "muebles y cocinas": "furniture & kitchens",
+      "CDA y talleres": "vehicle inspection & repair",
+      "ferretería y materiales": "hardware & building supplies",
+      "agencia de seguros": "insurance agency",
+      "estudio de arquitectura": "architecture firm"
+    },
+    "FL": {
       "clínica estética": "med spa / aesthetic clinic",
       "clínica odontológica": "dental clinic",
       "dermatólogo": "dermatologist",

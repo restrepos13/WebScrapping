@@ -28,7 +28,7 @@ window.RadarComun = (function () {
     marca = marca || marcaGuardada() || "[MARCA]";
     const s = n.senales || {};
     const gancho = n.gancho ? n.gancho.replace(/\s*Pitch:.*$/, "").trim() : "";
-    if (n.pais === "TX") {
+    if (n.pais === "TX" || n.pais === "FL") {
       const extras = [];
       if (s.sin_agendador) extras.push("online booking");
       if (s.sin_espanol) extras.push("answers in English and Spanish");
@@ -45,7 +45,7 @@ window.RadarComun = (function () {
   /* toques 2 y 3: cortos, sin repetir el pitch */
   function toque(t, nombre, pais, marca) {
     marca = marca || marcaGuardada() || "[MARCA]";
-    if (pais === "TX") return t === "t2"
+    if (pais === "TX" || pais === "FL") return t === "t2"
       ? `Hi again — one quick data point and I won't bother you this week: businesses that answer inquiries within 5 minutes book far more than those that reply hours later, and our assistant answers in seconds, 24/7, in English and Spanish. If you can share the owner's contact, I'll take it from there. Thanks!`
       : `Hi, last message from me — I respect that this line is for other things. We're ${marca}: AI-powered customer messaging on a flexible monthly plan, and the demo takes 10 minutes. If it ever makes the agenda, this number is here. All the best to ${nombre}!`;
     return t === "t2"

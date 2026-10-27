@@ -31,7 +31,8 @@ locales (BORME, geocodificación) y no se suben.
 |---|---|---|
 | Colombia | Google Places (principal) · OSM · RUES | `python3 scan.py --zona medellin` · `python3 osm.py --pais CO` |
 | España | Google Places (principal) · OSM · BORME · OpenMercantil | `./barrido_nocturno.sh ES` (de noche: horas) · `python3 scan.py --zona es-madrid` |
-| Texas | Google Places (principal) · OSM · Comptroller · TBAE · Census | `python3 texas.py` · `python3 osm.py --pais TX` |
+| Texas | Google Places (principal) · OSM · Comptroller · TBAE · Census | `python3 texas.py` · `python3 osm.py --pais TX` · `./barrido_texas.sh` |
+| Florida (Miami) | Google Places (principal) · OSM | `python3 scan.py --zona fl-miami` · `python3 osm.py --zona fl-miami` |
 
 Después de cualquier barrido:
 ```
