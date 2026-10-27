@@ -160,8 +160,15 @@ def _supabase():
     return url.rstrip("/"), key
 
 def ip_cliente():
+    # El sitio se entra por Render o por el proxy de Vercel. Vercel manda la IP
+    # original en X-Vercel-Forwarded-For; Cloudflare (delante de Render) la pone
+    # en CF-Connecting-IP. Sin esto, las visitas que pasan por Vercel quedaban
+    # anotadas con la IP del borde de Vercel (AWS), no con la de la persona.
+    candidatas = []
+    for cabecera in ("X-Vercel-Forwarded-For", "CF-Connecting-IP"):
+        candidatas += [x.strip() for x in (request.headers.get(cabecera) or "").split(",") if x.strip()]
     cadena = request.headers.get("X-Forwarded-For") or ""
-    candidatas = [x.strip() for x in cadena.split(",") if x.strip()]
+    candidatas += [x.strip() for x in cadena.split(",") if x.strip()]
     extra = request.headers.get("X-Real-IP")
     if extra:
         candidatas.append(extra.strip())
@@ -222,7 +229,7 @@ def _enriquecer(d):
         return
     fila = [{"app": "accesos", "id": d["id"], "data": {k: d.get(k, "") for k in (
         "ts", "ok", "email", "ip", "ciudad", "region", "pais", "isp", "dispositivo",
-        "ua", "ruta", "motivo", "ref")}}]
+        "ua", "ruta", "motivo", "ref", "via")}}]
     try:
         req = urllib.request.Request(
             f"{url}/rest/v1/radar_estados", data=json.dumps(fila).encode(),
@@ -244,6 +251,9 @@ def registrar(ok, email="", ruta="", motivo=""):
         "ua": (request.headers.get("User-Agent") or "")[:300],
         "ruta": ruta or request.path, "motivo": motivo,
         "ref": (request.referrer or "")[:200],
+        # cadena de proxies tal como llegó: sirve para saber por dónde entró
+        # (Vercel, Cloudflare, directo) y depurar la IP si alguna vez no cuadra
+        "via": (request.headers.get("X-Forwarded-For") or "")[:160],
     }
     _mem.appendleft(d)
     threading.Thread(target=_enriquecer, args=(d,), daemon=True).start()
