@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
 <title>Radar · Prospección</title>
+<script src="auth.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=Spline+Sans+Mono:wght@400;500;600&display=swap">
 <style>
 :root{--ink:#ECEDEF;--ink2:#9CA2AD;--ink3:#5E6470;--line:rgba(255,255,255,.09);--amber:#FFB020;--verde:#39FF6E}
@@ -50,7 +52,7 @@ footer{margin-top:28px;font-size:11px;color:var(--ink3);font-family:"Spline Sans
       <span class="go">Abrir listado →</span>
     </a>
   </div>
-  <footer id="pie">estados sincronizados entre el equipo · datos: pipeline local</footer>
+  <footer id="pie">estados sincronizados entre el equipo · datos: pipeline local · <a href="/accesos" style="color:inherit;text-decoration:underline">accesos</a> · <a href="#" onclick="RadarAuth.salir();return false" style="color:inherit;text-decoration:underline">salir</a></footer>
 </div>
 <script src="sync.js"></script>
 </body>

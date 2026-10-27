@@ -2,9 +2,25 @@
   "rewrites": [
     { "source": "/data/:path*", "destination": "https://radar-nocturno.onrender.com/data/:path*" },
     { "source": "/config.json", "destination": "https://radar-nocturno.onrender.com/config.json" },
-    { "source": "/healthz", "destination": "https://radar-nocturno.onrender.com/healthz" }
+    { "source": "/healthz", "destination": "https://radar-nocturno.onrender.com/healthz" },
+    { "source": "/api/:path*", "destination": "https://radar-nocturno.onrender.com/api/:path*" },
+    { "source": "/login", "destination": "https://radar-nocturno.onrender.com/login" },
+    { "source": "/accesos", "destination": "https://radar-nocturno.onrender.com/accesos" }
+  ],
+  "redirects": [
+    { "source": "/:archivo(.*\\.py)", "destination": "/", "permanent": false },
+    { "source": "/:archivo(.*\\.sh)", "destination": "/", "permanent": false },
+    { "source": "/:archivo(.*\\.sql)", "destination": "/", "permanent": false },
+    { "source": "/:archivo(.*\\.md)", "destination": "/", "permanent": false },
+    { "source": "/requirements.txt", "destination": "/", "permanent": false },
+    { "source": "/:archivo(.*\\.pdf)", "destination": "/", "permanent": false },
+    { "source": "/vercel.json", "destination": "/", "permanent": false }
   ],
   "headers": [
-    { "source": "/(.*)", "headers": [ { "key": "X-Robots-Tag", "value": "noindex" } ] }
+    { "source": "/(.*)", "headers": [
+      { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive, nosnippet" },
+      { "key": "X-Frame-Options", "value": "DENY" },
+      { "key": "Referrer-Policy", "value": "no-referrer" }
+    ] }
   ]
 }

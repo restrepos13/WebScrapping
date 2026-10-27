@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
 <title>Tracker de Prospección</title>
+<script src="auth.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=Spline+Sans+Mono:wght@400;500;600&display=swap">
 <style>
 :root{
@@ -413,7 +415,7 @@ async function cargarRadar(){
     const zonas=Object.keys(idx).filter(z=>idx[z].pais==="CO");
     zonas.forEach(z=>ZONAS_CO[z]=((cfg.zonas||{})[z]||{}).nombre||z);
     const partes=await Promise.all(zonas.map(z=>fetch(`data/zonas/${z}.json`).then(r=>r.ok?r.json():[]).catch(()=>[])));
-    RADAR=partes.flat();
+    RADAR=partes.flat().filter(n=>!n.ruido); // ruido marcado por limpieza.py no entra al listado
     RADAR.forEach(n=>{n._sc=RC.score(n);n._q=[n.nombre,n.categoria,n.subzona,n.direccion,n.tel,n.wa,(n.emails||[]).join(" "),(n.registro||{}).razon_social]
       .filter(Boolean).join(" ").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")});
     // selects con conteos
@@ -644,6 +646,7 @@ $("#btn-csv").onclick=()=>{
   dl("listado-campana-"+hoy()+".csv",csv,"text/csv;charset=utf-8");
 };
 
+RadarAuth.listo.then(()=>{
 document.getElementById("total").textContent=P.length;
 render();
 cargarRadar().then(()=>{completarOtros();pestanas();render()});
@@ -659,6 +662,7 @@ cargarRadar().then(()=>{completarOtros();pestanas();render()});
   SYNC=await RadarSync.init(cfg,"tracker",state,m=>{state=m;save();render();});
   SYNC_MAPA=await RadarSync.init(cfg,"mapa",EST,m=>{EST=m;saveEst();render();});
 })();
+});
 </script>
 </body>
 </html>

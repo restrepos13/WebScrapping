@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
 <title>Radar Nocturno</title>
+<script src="auth.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=Spline+Sans+Mono:wght@400;500;600&display=swap">
 <style>
@@ -869,9 +871,9 @@ async function boot(){
     document.body.insertAdjacentHTML("beforeend",
       `<div style="position:absolute;inset:0;z-index:50;display:grid;place-items:center;background:#05060A">
         <div style="max-width:420px;text-align:center;font-family:'Spline Sans Mono',monospace;color:#9CA2AD;font-size:13px;line-height:1.8">
-          <b style="color:#FFB020;font-size:15px">Falta la llave de acceso</b><br>
-          Entrá una vez con <b style="color:#ECEDEF">?key=TU_TOKEN</b> al final de la URL<br>
-          (queda guardada en este navegador).<br>
+          <b style="color:#FFB020;font-size:15px">Sesión no válida</b><br>
+          Volvé a entrar para cargar los datos.<br>
+          <a href="/login" style="color:#ECEDEF;text-decoration:underline">Ir a la pantalla de acceso</a><br>
           <span style="font-size:11px;color:#5E6470">detalle: ${e.message}</span>
         </div></div>`);
     return;
@@ -907,7 +909,7 @@ async function boot(){
   })();
   window.RADAR={map,get negocios(){return NEGOCIOS},estados:()=>EST,repintar:pintar,score,mensajeDe};
 }
-boot();
+RadarAuth.listo.then(boot);
 </script>
 </body>
 </html>

@@ -17,10 +17,38 @@
    `config.json` (con la API key), `.venv/` y los PDFs están en `.gitignore` — no suben.
 2. En render.com → New → **Blueprint** → conectar el repo. Render lee `render.yaml`
    y crea el servicio en plan free automáticamente.
-3. En el dashboard del servicio → Environment → poner valor a **RADAR_TOKEN**
-   (cualquier clave tuya, ej. `radar2026x`). Sin esa variable el sitio queda público.
-4. Listo: `https://radar-nocturno.onrender.com/mapa.html?key=TU_TOKEN`
-   (la key queda en cookie 90 días; después entrás sin ella).
+3. En el dashboard del servicio → Environment: el acceso ya viene cerrado con el
+   correo del propietario y la contraseña por defecto. Para cambiarlos, agregá
+   `RADAR_USER` y `RADAR_PASS_HASH` (el hash se genera con `python3 server.py --hash`).
+4. Listo: `https://radar-nocturno.onrender.com/` pide correo y contraseña.
+   La sesión dura 30 días.
+
+## Acceso privado (login + registro de intentos)
+- **Sin registro.** Solo entra el correo de `RADAR_USER` (por defecto
+  `restrepos591@gmail.com`) con la contraseña cuyo hash vive en `RADAR_PASS_HASH`
+  (o en el valor por defecto de `server.py`). La contraseña nunca se guarda ni viaja.
+- **Todo cerrado.** `/`, las páginas, `/config.json` y `/data/*` responden 401 o
+  redirigen a `/login` sin sesión. Solo quedan libres `/login`, `/api/*`,
+  `/healthz` y los JS sin datos.
+- **Registro de intentos.** Cada entrada (buena o rechazada) guarda hora, correo,
+  IP, ciudad/país, operador, dispositivo y ruta. Se ve en `/accesos` (también
+  protegido) y queda en Supabase en `radar_estados` con `app='accesos'`, así que
+  sobrevive a los reinicios de Render. Sin Supabase configurado queda solo en
+  memoria y en los logs de Render.
+- **Freno a la fuerza bruta:** 10 fallos por IP en 10 minutos → 429.
+- **Cambiar la contraseña:**
+  ```
+  python3 server.py --hash          # pide la nueva y devuelve el hash
+  ```
+  y pegar el resultado en `RADAR_PASS_HASH` (Render → Environment). Sin eso, la
+  forma rápida es editar `CLAVE_HASH` en `server.py`. Al cambiarla, caducan las
+  sesiones abiertas.
+- **Cerrar sesión:** link "salir" en el pie del inicio o en `/accesos`.
+- **Sin SEO:** `robots.txt` con `Disallow: /`, `X-Robots-Tag: noindex` en Render y
+  Vercel, y `noindex` en el HTML. No hay sitemap ni enlaces externos.
+- **Archivos fuente fuera de Vercel:** `vercel.json` redirige `.py`, `.sh`, `.sql`,
+  `.md`, `.pdf` y `requirements.txt` a `/` (el repo es privado, pero el front no
+  los sirve).
 
 ## Actualizar datos (cada vez que barras/audites)
 Los datos viven en `data/zonas/<zona>.json` (una zona = un archivo; el mapa baja
@@ -57,10 +85,11 @@ Si molesta: crear un monitor gratuito en cron-job.org o UptimeRobot que haga GET
 1. vercel.com → Add New → Project → importar `restrepos13/WebScrapping`
    (Framework Preset: **Other**; sin build command; Output: raíz). Deploy.
 2. `vercel.json` ya trae el proxy: las páginas salen del CDN de Vercel y
-   `/data/*`, `/config.json` y `/healthz` se reenvían al back de Render.
-3. Entrar SIEMPRE la primera vez con `https://<proyecto>.vercel.app/?key=TU_TOKEN`
-   — la key queda guardada en el navegador y las páginas cargan los datos.
-   (El primer fetch de datos del día puede tardar ~50s: es Render despertando.)
+   `/data/*`, `/config.json`, `/api/*`, `/login`, `/accesos` y `/healthz` se
+   reenvían al back de Render.
+3. Entrar con el correo y la contraseña en la pantalla de acceso; la sesión
+   queda guardada 30 días en ese navegador.
+   (El primer pedido del día puede tardar ~50s: es Render despertando.)
 
 ## Estados compartidos entre personas (Supabase)
 1. Crear cuenta/proyecto gratis en supabase.com (region São Paulo es la más cercana).
