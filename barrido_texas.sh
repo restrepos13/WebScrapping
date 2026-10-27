@@ -24,5 +24,5 @@ python3 -u audit.py --pais TX | tee -a "data/registros/audit-tx-$HOY.log"
 
 git add data/zonas
 git commit -m "Datos Texas $HOY: Google Places + auditoría"
-git push origin main
+git push origin main || echo "Aviso: no se pudo hacer push (los datos quedaron commiteados en local)."
 echo "Listo: Texas completo, auditado y publicado."
