@@ -16,7 +16,7 @@ Extrae correos y redes de la homepage. No usa dependencias externas.
 import json, os, re, ssl, argparse, urllib.request, urllib.error, socket
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from comun import cargar_zona, guardar_zona, zonas_con_datos
+from comun import cargar_zona, guardar_zona, zonas_con_datos, wa_de
 from categorias import CATEGORIAS, etiqueta
 
 CHATBOTS = ["cliengo", "manychat", "tidio", "tawk.to", "crisp.chat", "intercom",
@@ -54,6 +54,29 @@ def fetch(url):
         return "", "muerta"
     except Exception:
         return "", "muerta"
+
+def telefonos(html, pais):
+    """Teléfono y WhatsApp que el negocio publica en su propia web.
+
+    Google Places no es la única vía: si la web trae enlaces `tel:` o
+    `wa.me/…`, ese contacto es público y verificable. Se usa solo para
+    completar registros que llegaron sin teléfono (OSM, registros).
+    """
+    crudos = re.findall(r"tel:\s*([+0-9][0-9\s().\-]{5,20})", html, re.I)
+    crudos += re.findall(r"(?:wa\.me/|api\.whatsapp\.com/send\?phone=)(\+?\d{7,15})", html)
+    tel = wa = ""
+    for c in crudos:
+        d = re.sub(r"\D", "", c)
+        if not 7 <= len(d) <= 15:
+            continue
+        if not wa:
+            wa = wa_de(c, pais)
+        if not tel:
+            tel = "+" + d
+        if tel and wa:
+            break
+    return ("+" + wa if wa else tel), wa
+
 
 def gancho_de(n, s):
     if n.get("pais") in ("TX", "FL"):
@@ -141,7 +164,7 @@ def main():
         html, err = fetch(n["web"].strip())
         if err:
             s = {"sin_web": False, "web_rota": True, "error": err, "tiene_wa": bool(n.get("wa"))}
-            return n, s, None, None
+            return n, s, None, None, "", ""
         s = {
             "sin_web": False,
             "web_rota": False,
@@ -159,20 +182,28 @@ def main():
             m = re.search(pat, html)
             if m and m.group(1) not in ("p", "reel", "share", "sharer.php", "plugins"):
                 redes[red] = m.group(1)
-        return n, s, emails, redes
+        tel, wa = telefonos(html, n.get("pais", "CO"))
+        return n, s, emails, redes, tel, wa
 
     hechos = 0
     with ThreadPoolExecutor(max_workers=12) as pool:
         futuros = {pool.submit(auditar, n): n for n in pendientes}
         for fut in as_completed(futuros):
             try:
-                n, s, emails, redes = fut.result()
+                n, s, emails, redes, tel, wa = fut.result()
             except Exception:
                 continue
             if emails is not None:
                 n["emails"] = emails
             if redes is not None:
                 n["redes"] = redes
+            if tel and not n.get("tel"):
+                n["tel"] = tel
+                fuentes = list(n.get("fuentes") or [n.get("fuente", "osm")])
+                if "web" not in fuentes:
+                    n["fuentes"] = fuentes + ["web"]
+            if wa and not n.get("wa"):
+                n["wa"] = wa
             n["senales"] = s
             n["gancho"] = gancho_de(n, s)
             n["auditado"] = True
