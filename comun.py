@@ -81,6 +81,15 @@ def wa_de(tel, pais):
         if not d.startswith("57") and len(d) == 10:
             d = "57" + d
         return d
+    if pais in ("EC", "PE"):
+        pref = "593" if pais == "EC" else "51"
+        if d.startswith("00"):
+            d = d[2:]
+        if d.startswith(pref) and len(d) == len(pref) + 9 and d[len(pref)] == "9":
+            return d
+        if len(d) == 10 and d.startswith("0"):
+            d = d[1:]  # 09 9999 9999 → 9 9999 9999
+        return pref + d if len(d) == 9 and d[0] == "9" else ""  # solo móviles
     if pais == "ES":
         if d.startswith("0034"):
             d = d[4:]

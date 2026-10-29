@@ -109,6 +109,95 @@
       ],
       "pais": "CO"
     },
+    "fl-miami": {
+      "nombre": "Miami",
+      "pais": "FL",
+      "centro": [
+        25.7617,
+        -80.1918
+      ],
+      "zoom": 10,
+      "subzonas": [
+        "Brickell, Miami, FL",
+        "Downtown Miami, FL",
+        "Miami Beach, FL",
+        "Wynwood, Miami, FL",
+        "Coral Gables, FL",
+        "Little Havana, Miami, FL",
+        "Doral, FL",
+        "Hialeah, FL",
+        "Aventura, FL",
+        "Kendall, Miami, FL"
+      ]
+    },
+    "quito": {
+      "nombre": "Quito",
+      "pais": "EC",
+      "centro": [
+        -0.1807,
+        -78.4678
+      ],
+      "zoom": 11,
+      "subzonas": [
+        "La Carolina, Quito",
+        "Iñaquito, Quito",
+        "Carcelén, Quito",
+        "Kennedy, Quito",
+        "La Floresta, Quito",
+        "La Mariscal, Quito",
+        "Centro Histórico, Quito",
+        "El Batán, Quito",
+        "Quitumbe, Quito",
+        "Chillogallo, Quito",
+        "Guamaní, Quito",
+        "La Magdalena, Quito",
+        "Cumbayá, Quito",
+        "Tumbaco, Quito",
+        "Sangolquí, Ecuador",
+        "Los Chillos, Quito",
+        "Calderón, Quito",
+        "Pomasqui, Quito"
+      ]
+    },
+    "lima": {
+      "nombre": "Lima",
+      "pais": "PE",
+      "centro": [
+        -12.0464,
+        -77.0428
+      ],
+      "zoom": 10,
+      "subzonas": [
+        "Miraflores, Lima",
+        "San Isidro, Lima",
+        "Santiago de Surco, Lima",
+        "La Molina, Lima",
+        "San Borja, Lima",
+        "Surquillo, Lima",
+        "Jesús María, Lima",
+        "Lince, Lima",
+        "Magdalena del Mar, Lima",
+        "Pueblo Libre, Lima",
+        "San Miguel, Lima",
+        "Barranco, Lima",
+        "Chorrillos, Lima",
+        "La Victoria, Lima",
+        "Cercado de Lima",
+        "Breña, Lima",
+        "San Luis, Lima",
+        "Ate, Lima",
+        "Santa Anita, Lima",
+        "San Juan de Lurigancho, Lima",
+        "Los Olivos, Lima",
+        "San Martín de Porres, Lima",
+        "Comas, Lima",
+        "Independencia, Lima",
+        "Callao, Perú",
+        "Villa El Salvador, Lima",
+        "San Juan de Miraflores, Lima",
+        "Carabayllo, Lima"
+      ]
+    },
     "es-a-coruna": {
       "nombre": "A Coruña",
       "pais": "ES",
@@ -207,17 +296,7 @@
         2.1686
       ],
       "zoom": 10,
-      "iso": "ES-B",
-      "subzonas": [
-        "Eixample, Barcelona, España",
-        "Ciutat Vella, Barcelona, España",
-        "Gràcia, Barcelona, España",
-        "Sarrià-Sant Gervasi, Barcelona, España",
-        "Les Corts, Barcelona, España",
-        "Sant Martí, Barcelona, España",
-        "Sants-Montjuïc, Barcelona, España",
-        "L'Hospitalet de Llobregat, Barcelona, España"
-      ]
+      "iso": "ES-B"
     },
     "es-bizkaia": {
       "nombre": "Bizkaia",
@@ -447,17 +526,7 @@
         -3.7038
       ],
       "zoom": 10,
-      "iso": "ES-M",
-      "subzonas": [
-        "Centro, Madrid, España",
-        "Salamanca, Madrid, España",
-        "Chamberí, Madrid, España",
-        "Retiro, Madrid, España",
-        "Moncloa-Aravaca, Madrid, España",
-        "Tetuán, Madrid, España",
-        "Ciudad Lineal, Madrid, España",
-        "Carabanchel, Madrid, España"
-      ]
+      "iso": "ES-M"
     },
     "es-malaga": {
       "nombre": "Málaga",
@@ -756,27 +825,6 @@
         -101.6
       ],
       "zoom": 7
-    },
-    "fl-miami": {
-      "nombre": "Miami",
-      "pais": "FL",
-      "centro": [
-        25.7617,
-        -80.1918
-      ],
-      "zoom": 10,
-      "subzonas": [
-        "Brickell, Miami, FL",
-        "Downtown Miami, FL",
-        "Miami Beach, FL",
-        "Wynwood, Miami, FL",
-        "Coral Gables, FL",
-        "Little Havana, Miami, FL",
-        "Doral, FL",
-        "Hialeah, FL",
-        "Aventura, FL",
-        "Kendall, Miami, FL"
-      ]
     }
   },
   "categorias": [
@@ -812,6 +860,18 @@
       "prefijo": "57",
       "registro": "RUES"
     },
+    "EC": {
+      "nombre": "Ecuador",
+      "idioma": "es",
+      "prefijo": "593",
+      "registro": "SRI"
+    },
+    "PE": {
+      "nombre": "Perú",
+      "idioma": "es",
+      "prefijo": "51",
+      "registro": "SUNAT"
+    },
     "ES": {
       "nombre": "España",
       "idioma": "es",
@@ -841,35 +901,6 @@
       "escuela de conducción": "autoescuela"
     },
     "TX": {
-      "clínica estética": "med spa / aesthetic clinic",
-      "clínica odontológica": "dental clinic",
-      "dermatólogo": "dermatologist",
-      "cirujano plástico": "plastic surgeon",
-      "veterinaria": "veterinary clinic",
-      "barbería": "barbershop",
-      "salón de belleza": "hair salon",
-      "gimnasio": "gym",
-      "inmobiliaria": "real estate agency",
-      "concesionario de motos": "motorcycle dealer",
-      "concesionario de carros": "car dealer",
-      "hotel boutique": "hotel",
-      "hostal": "hostel / B&B",
-      "academia de idiomas": "language school",
-      "escuela de conducción": "driving school",
-      "agencia de viajes": "travel agency",
-      "óptica": "optician",
-      "centro de estética": "beauty salon",
-      "estudio webcam": "webcam studio",
-      "agencia de modelos": "model agency",
-      "restaurante": "restaurant",
-      "energía solar": "solar installer",
-      "muebles y cocinas": "furniture & kitchens",
-      "CDA y talleres": "vehicle inspection & repair",
-      "ferretería y materiales": "hardware & building supplies",
-      "agencia de seguros": "insurance agency",
-      "estudio de arquitectura": "architecture firm"
-    },
-    "FL": {
       "clínica estética": "med spa / aesthetic clinic",
       "clínica odontológica": "dental clinic",
       "dermatólogo": "dermatologist",

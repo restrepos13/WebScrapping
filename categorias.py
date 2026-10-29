@@ -78,26 +78,41 @@ CATEGORIAS = {
     "restaurante": {
         "en": "restaurant", "q": {"ES": "restaurante", "TX": "restaurant"},
         "naics": ["722511"], "cnae": ["56.10", "56.11"], "kw": ["restaurante"]},
+    "cafetería": {
+        "en": "cafe", "q": {"ES": "cafetería"},
+        "naics": [], "cnae": [], "kw": ["cafeteria", "cafetería"]},
+    "comida rápida": {
+        "en": "fast food", "q": {"ES": "comida rápida"},
+        "naics": [], "cnae": [], "kw": ["comida rapida", "comida rápida"]},
+    "bar": {
+        "en": "bar", "q": {"ES": "bar"},
+        "naics": [], "cnae": [], "kw": ["bar"]},
+    "panadería": {
+        "en": "bakery", "q": {"ES": "panadería"},
+        "naics": [], "cnae": [], "kw": ["panaderia", "panadería"]},
+    "heladería": {
+        "en": "ice cream shop", "q": {"ES": "heladería"},
+        "naics": [], "cnae": [], "kw": ["heladeria", "heladería"]},
     # --- verticales nuevos (por ahora solo Colombia): alto volumen de consultas
     #     repetitivas por WhatsApp, venta por cotización y/o clientes recurrentes
     "energía solar": {
-        "en": "solar installer", "q": {"CO": ["paneles solares", "energía solar"]}, "solo": ["CO"],
+        "en": "solar installer", "q": {"CO": ["paneles solares", "energía solar"]},
         "naics": [], "cnae": [], "kw": [],
         "pitch": "cotización automática: el bot pide la factura de luz, calcula el ahorro y agenda la visita técnica"},
     "muebles y cocinas": {
-        "en": "furniture & kitchens", "q": {"CO": ["fábrica de muebles", "cocinas integrales"]}, "solo": ["CO"],
+        "en": "furniture & kitchens", "q": {"CO": ["fábrica de muebles", "cocinas integrales"]},
         "naics": [], "cnae": [], "kw": [],
         "pitch": "catálogo y cotización por WhatsApp: el bot recibe fotos y medidas y agenda la toma de medidas"},
     "CDA y talleres": {
-        "en": "vehicle inspection & repair", "q": {"CO": ["centro de diagnóstico automotor", "taller automotriz"]}, "solo": ["CO"],
+        "en": "vehicle inspection & repair", "q": {"CO": ["centro de diagnóstico automotor", "taller automotriz"]},
         "naics": [], "cnae": [], "kw": [],
         "pitch": "agendamiento de revisión y recordatorio automático del vencimiento de la técnico-mecánica"},
     "ferretería y materiales": {
-        "en": "hardware & building supplies", "q": {"CO": ["ferretería", "depósito de materiales de construcción"]}, "solo": ["CO"],
+        "en": "hardware & building supplies", "q": {"CO": ["ferretería", "depósito de materiales de construcción"]},
         "naics": [], "cnae": [], "kw": [],
         "pitch": "pedidos por WhatsApp con catálogo, precio y stock al instante, y domicilio"},
     "agencia de seguros": {
-        "en": "insurance agency", "q": {"CO": ["agencia de seguros"]}, "solo": ["CO"],
+        "en": "insurance agency", "q": {"CO": ["agencia de seguros"]},
         "naics": [], "cnae": [], "kw": [],
         "pitch": "cotizador de SOAT y pólizas 24/7 y recordatorios de renovación"},
     "estudio de arquitectura": {
@@ -106,6 +121,35 @@ CATEGORIAS = {
 }
 
 NAICS_A_CAT = {c: k for k, v in CATEGORIAS.items() for c in v["naics"]}
+
+# Ecuador y Perú comparten el español de Colombia, con pocos términos locales.
+# Solo se listan los que cambian; el resto usa el texto español de cada categoría.
+Q_PAIS_LOCAL = {
+    "EC": {
+        "clínica odontológica": "clínica dental",
+        "salón de belleza": ["salón de belleza", "peluquería"],
+        "concesionario de carros": "concesionario de vehículos",
+        "escuela de conducción": ["escuela de conducción", "escuela de manejo"],
+        "energía solar": ["paneles solares", "energía solar"],
+        "muebles y cocinas": ["muebles", "cocinas integrales"],
+        "CDA y talleres": ["taller automotriz", "revisión técnica vehicular"],
+        "ferretería y materiales": ["ferretería", "materiales de construcción"],
+        "agencia de seguros": "agencia de seguros",
+        "estudio de arquitectura": "estudio de arquitectura",
+    },
+    "PE": {
+        "clínica odontológica": "clínica dental",
+        "salón de belleza": ["salón de belleza", "peluquería"],
+        "concesionario de carros": "concesionario de autos",
+        "escuela de conducción": ["escuela de manejo", "escuela de conducción"],
+        "energía solar": ["paneles solares", "energía solar"],
+        "muebles y cocinas": ["muebles", "cocinas integrales"],
+        "CDA y talleres": ["taller automotriz", "revisión técnica"],
+        "ferretería y materiales": ["ferretería", "materiales de construcción"],
+        "agencia de seguros": "agencia de seguros",
+        "estudio de arquitectura": "estudio de arquitectura",
+    },
+}
 
 def etiqueta(cat, pais):
     """Nombre a mostrar: en EE.UU. (Texas/Florida) en inglés, en España el término local."""
@@ -128,6 +172,14 @@ def consultas_google(pais, base_co):
     "q" propio para FL (Miami es bilingüe: se puede afinar por rubro).
     """
     pares = [(c, c) for c in base_co] if pais == "CO" else []
+    # Ecuador y Perú: español local, sin las etiquetas en inglés de EE.UU.
+    if pais in Q_PAIS_LOCAL:
+        ov = Q_PAIS_LOCAL[pais]
+        pares = []
+        for k, v in CATEGORIAS.items():
+            q = ov.get(k) or v.get("q", {}).get("ES") or k
+            pares += [(k, t) for t in (q if isinstance(q, list) else [q])]
+        return pares
     for k, v in CATEGORIAS.items():
         q = v.get("q", {}).get(pais) or (v.get("q", {}).get("TX") if pais == "FL" else None)
         if not q or (pais == "CO" and k in base_co):
@@ -138,12 +190,12 @@ def consultas_google(pais, base_co):
 # ---------------- OpenStreetMap ----------------
 # Filtros que se piden a Overpass (unión). La clasificación fina se hace en Python.
 OSM_FILTROS = [
-    '["amenity"~"^(dentist|veterinary|restaurant|language_school|driving_school|clinic|doctors|spa)$"]',
-    '["shop"~"^(hairdresser|beauty|massage|optician|car|motorcycle|travel_agency|estate_agent)$"]',
-    '["leisure"~"^(fitness_centre|spa)$"]',
+    '["amenity"~"^(dentist|veterinary|restaurant|cafe|fast_food|food_court|bar|pub|biergarten|language_school|driving_school|clinic|doctors|spa)$"]',
+    '["shop"~"^(hairdresser|beauty|massage|optician|cosmetics|bakery|ice_cream|car|motorcycle|travel_agency|estate_agent|interior_decoration)$"]',
+    '["leisure"~"^(fitness_centre|sports_centre|spa)$"]',
     '["office"~"^(estate_agent|travel_agent|architect)$"]',
-    '["tourism"~"^(hotel|hostel|guest_house)$"]',
-    '["healthcare"~"^(dentist|clinic|doctor)$"]',
+    '["tourism"~"^(hotel|hostel|guest_house|apartment)$"]',
+    '["healthcare"~"^(dentist|clinic|doctor|optometrist)$"]',
     '["shop"~"^(furniture|kitchen|car_repair|hardware|doityourself|trade|energy|solar)$"]',
     '["craft"~"^(carpenter|electrician|photovoltaic|solar)$"]',
     '["office"="insurance"]',
@@ -189,8 +241,12 @@ def _clasificar_osm(t):
         return "centro de estética"
     if shop == "massage" or amen == "spa" or t.get("leisure") == "spa":
         return "spa"
-    if t.get("leisure") == "fitness_centre":
+    if t.get("leisure") in ("fitness_centre", "sports_centre"):
         return "gimnasio"
+    if shop == "cosmetics":
+        return "centro de estética"
+    if shop == "interior_decoration":
+        return "muebles y cocinas"
     if t.get("office") == "estate_agent" or shop == "estate_agent":
         return "inmobiliaria"
     if shop == "motorcycle":
@@ -200,7 +256,7 @@ def _clasificar_osm(t):
     tur = t.get("tourism", "")
     if tur == "hotel":
         return "hotel boutique"
-    if tur in ("hostel", "guest_house"):
+    if tur in ("hostel", "guest_house", "apartment"):
         return "hostal"
     if amen == "language_school":
         return "academia de idiomas"
@@ -208,10 +264,20 @@ def _clasificar_osm(t):
         return "escuela de conducción"
     if shop == "travel_agency" or t.get("office") == "travel_agent":
         return "agencia de viajes"
-    if shop == "optician":
+    if shop == "optician" or hc == "optometrist":
         return "óptica"
     if amen == "restaurant":
         return "restaurante"
+    if amen == "cafe":
+        return "cafetería"
+    if amen in ("fast_food", "food_court"):
+        return "comida rápida"
+    if amen in ("bar", "pub", "biergarten"):
+        return "bar"
+    if shop == "bakery":
+        return "panadería"
+    if shop == "ice_cream":
+        return "heladería"
     if t.get("office") == "architect":
         return "estudio de arquitectura"
     craft = t.get("craft", "")
@@ -226,6 +292,30 @@ def _clasificar_osm(t):
         return "ferretería y materiales"
     if t.get("office") == "insurance":
         return "agencia de seguros"
+    # último recurso: el nombre del negocio cuando el tag es genérico
+    if shop or t.get("office") or amen or hc:
+        if re.search(r"inmobiliari|bienes ra[ií]ces|propiedades", nombre, re.I):
+            return "inmobiliaria"
+        if re.search(r"seguros", nombre, re.I):
+            return "agencia de seguros"
+        if re.search(r"viajes|travel", nombre, re.I):
+            return "agencia de viajes"
+        if re.search(r"arquitect", nombre, re.I):
+            return "estudio de arquitectura"
+        if re.search(r"barber", nombre, re.I):
+            return "barbería"
+        if re.search(r"gimnasio|fitness|crossfit|gym", nombre, re.I):
+            return "gimnasio"
+        if _RE_ESTETICA.search(nombre):
+            return "centro de estética"
+        if re.search(r"dental|odontolog", nombre, re.I):
+            return "clínica odontológica"
+        if re.search(r"veterinari", nombre, re.I):
+            return "veterinaria"
+        if re.search(r"hotel", nombre, re.I):
+            return "hotel boutique"
+        if re.search(r"hostal|hostel", nombre, re.I):
+            return "hostal"
     return None
 
 # ---------------- BORME ----------------

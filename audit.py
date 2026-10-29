@@ -111,7 +111,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--max", type=int, default=100000)
-    ap.add_argument("--pais", choices=["CO", "ES", "TX", "FL"])
+    ap.add_argument("--pais", choices=["CO", "ES", "EC", "PE", "TX", "FL"])
     ap.add_argument("--zona")
     args = ap.parse_args()
 

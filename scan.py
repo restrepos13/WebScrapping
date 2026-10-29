@@ -29,8 +29,8 @@ FIELD_MASK = ",".join([
     "places.internationalPhoneNumber", "places.types",
     "places.businessStatus", "nextPageToken",
 ])
-IDIOMA = {"CO": "es", "ES": "es", "TX": "en", "FL": "en"}
-REGION = {"CO": "co", "ES": "es", "TX": "us", "FL": "us"}
+IDIOMA = {"CO": "es", "ES": "es", "EC": "es", "PE": "es", "TX": "en", "FL": "en"}
+REGION = {"CO": "co", "ES": "es", "EC": "ec", "PE": "pe", "TX": "us", "FL": "us"}
 
 def search_text(key, query, pais, page_token=None, centro=None):
     body = {"textQuery": query, "languageCode": IDIOMA[pais], "regionCode": REGION[pais], "pageSize": 20}
@@ -57,7 +57,7 @@ def search_text(key, query, pais, page_token=None, centro=None):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--zona", help="clave de zona de config.json (ej. medellin, es-malaga, tx-capital)")
-    ap.add_argument("--pais", choices=["CO", "ES", "TX", "FL"])
+    ap.add_argument("--pais", choices=["CO", "ES", "EC", "PE", "TX", "FL"])
     ap.add_argument("--cat", help="una sola categoría (nombre canónico, ej. 'clínica estética')")
     ap.add_argument("--subzonas", help="lista separada por | para barrer solo esas subzonas de la zona")
     ap.add_argument("--paginas", type=int, default=3, help="páginas por consulta (20 c/u, máx 3)")

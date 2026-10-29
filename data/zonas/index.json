@@ -121,6 +121,12 @@
   "n": 5103,
   "actualizado": "2026-10-27"
  },
+ "lima": {
+  "pais": "PE",
+  "n": 11819,
+  "actualizado": "2026-10-29",
+  "osm": "2026-10-29"
+ },
  "medellin": {
   "pais": "CO",
   "n": 10058,
@@ -130,6 +136,12 @@
   "pais": "CO",
   "n": 1197,
   "actualizado": "2026-10-05"
+ },
+ "quito": {
+  "pais": "EC",
+  "n": 10537,
+  "actualizado": "2026-10-29",
+  "osm": "2026-10-29"
  },
  "tx-alamo": {
   "pais": "TX",

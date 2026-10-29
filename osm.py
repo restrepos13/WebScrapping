@@ -23,7 +23,7 @@ MIRRORS = [
     "https://overpass.kumi.systems/api/interpreter",
     "https://overpass.private.coffee/api/interpreter",
 ]
-RADIO_POR_ZOOM = {11: 22000, 12: 15000, 13: 9000}
+RADIO_POR_ZOOM = {10: 30000, 11: 22000, 12: 15000, 13: 9000}
 
 def area_ql(zona, z):
     pais = z.get("pais", "CO")
@@ -92,7 +92,7 @@ def registro(el, zona, pais):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--pais", choices=["CO", "ES", "TX", "FL"])
+    ap.add_argument("--pais", choices=["CO", "ES", "EC", "PE", "TX", "FL"])
     ap.add_argument("--zona")
     ap.add_argument("--saltar-hechas", action="store_true", help="omite zonas que ya tienen datos de OSM")
     args = ap.parse_args()

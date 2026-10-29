@@ -14,6 +14,8 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 
 PAISES = {
     "CO": {"nombre": "Colombia", "idioma": "es", "prefijo": "57", "registro": "RUES"},
+    "EC": {"nombre": "Ecuador", "idioma": "es", "prefijo": "593", "registro": "SRI"},
+    "PE": {"nombre": "Perú", "idioma": "es", "prefijo": "51", "registro": "SUNAT"},
     "ES": {"nombre": "España", "idioma": "es", "prefijo": "34", "registro": "BORME"},
     "TX": {"nombre": "Texas (EE.UU.)", "idioma": "en", "prefijo": "1", "registro": "Texas Comptroller"},
     "FL": {"nombre": "Florida (EE.UU.)", "idioma": "en", "prefijo": "1", "registro": "Sunbiz"},
@@ -248,6 +250,8 @@ def sync_config():
         cfg["etiquetas"] = {p: {c: etiqueta(c, p) for c in CATEGORIAS if etiqueta(c, p) != c} for p in ("ES", "TX")}
         json.dump(cfg, open(ruta, "w"), ensure_ascii=False, indent=2)
         print(f"{nombre}: {len(zonas)} zonas ({sum(1 for z in zonas.values() if z['pais']=='CO')} CO · "
+              f"{sum(1 for z in zonas.values() if z['pais']=='EC')} EC · "
+              f"{sum(1 for z in zonas.values() if z['pais']=='PE')} PE · "
               f"{len(PROVINCIAS_ES)} ES · {len(REGIONES_TX)} TX)")
 
 if __name__ == "__main__":
