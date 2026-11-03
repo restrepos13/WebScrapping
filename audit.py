@@ -136,6 +136,7 @@ def main():
     ap.add_argument("--max", type=int, default=100000)
     ap.add_argument("--pais", choices=["CO", "ES", "EC", "PE", "TX", "FL"])
     ap.add_argument("--zona")
+    ap.add_argument("--hilos", type=int, default=12, help="descargas en paralelo (default 12)")
     args = ap.parse_args()
 
     zonas = {z: cargar_zona(z) for z in zonas_con_datos(args.pais, args.zona)}
@@ -158,7 +159,7 @@ def main():
         elif (not n.get("auditado")) or args.force:
             pendientes.append(n)
     pendientes = pendientes[:args.max]
-    print(f"Auditando {len(pendientes)} webs con 12 hilos…", flush=True)
+    print(f"Auditando {len(pendientes)} webs con {args.hilos} hilos…", flush=True)
 
     def auditar(n):
         html, err = fetch(n["web"].strip())
@@ -186,7 +187,7 @@ def main():
         return n, s, emails, redes, tel, wa
 
     hechos = 0
-    with ThreadPoolExecutor(max_workers=12) as pool:
+    with ThreadPoolExecutor(max_workers=max(1, args.hilos)) as pool:
         futuros = {pool.submit(auditar, n): n for n in pendientes}
         for fut in as_completed(futuros):
             try:

@@ -60,18 +60,24 @@ locales (BORME, geocodificación) y no se suben.
 | Colombia | Google Places (principal) · OSM · RUES | `python3 scan.py --zona medellin` · `python3 osm.py --pais CO` |
 | España | Google Places (principal) · OSM · BORME · OpenMercantil | `./barrido_nocturno.sh ES` (de noche: horas) · `python3 scan.py --zona es-madrid` |
 | Texas | Google Places (principal) · OSM · Comptroller · TBAE · Census | `python3 texas.py` · `python3 osm.py --pais TX` · `./barrido_texas.sh` |
-| Ecuador | OSM (Geofabrik local) | `python3 osm_pbf.py --zona quito --pbf /tmp/ecuador.osm.pbf` |
-| Perú | OSM (Geofabrik local) | `python3 osm_pbf.py --zona lima --pbf /tmp/peru.osm.pbf` |
+| Ecuador | Google Places (principal, teléfonos) · OSM (Geofabrik local) | `python3 osm_pbf.py --zona quito --pbf /tmp/ecuador.osm.pbf` · `python3 scan.py --zona quito --paginas 2 --max-consultas 1500` |
+| Perú | Google Places (principal, teléfonos) · OSM (Geofabrik local) | `python3 osm_pbf.py --zona lima --pbf /tmp/peru.osm.pbf` · `python3 scan.py --zona lima --paginas 2 --max-consultas 2300` |
 | Florida (Miami) | Google Places (principal) · OSM | `python3 scan.py --zona fl-miami` · `python3 osm.py --zona fl-miami` |
 
 Después de cualquier barrido:
 ```
 python3 enrich_empresas.py --pais CO   # registros oficiales (RUES / BORME / Comptroller)
-python3 audit.py --pais CO             # señales de la web + gancho
+python3 dedupe.py --zona quito --aplicar   # une gemelos Google/OSM con nombres distintos
+python3 audit.py --pais CO             # señales de la web + gancho + correos
 git add data/zonas && git commit -m "datos $(date +%F)" && git push
 ```
 - `scan.py` (Google) muestra el costo estimado y pide confirmar; `--max-consultas`
-  (default 900 ≈ cupo gratis mensual) es un tope duro.
+  (default 900 ≈ cupo gratis mensual) es un tope duro. Text Search Enterprise
+  (trae teléfono y web) cuesta US$35/1.000 llamadas con 1.000 gratis al mes.
+- **Los teléfonos salen de Google Places**, no de OSM. OSM en Ecuador/Perú solo
+  trae contacto en 7-11% de los negocios.
+- `audit.py` completa `tel`/`wa` con los enlaces `tel:` y `wa.me/` de cada web,
+  además de correos y redes. Los correos nunca vienen de Google.
 - Fuentes de pago (Registradores, Texas SOS, Foursquare) no se usan.
 - Zonas de España/Texas: `python3 paises.py --sync-config` las regenera en ambos config.
 - Verticales nuevos (solo Colombia): energía solar, muebles y cocinas, CDA y talleres,

@@ -101,13 +101,20 @@ def main():
         for _ in range(paginas):
             if consultas >= args.max_consultas:
                 break
-            try:
-                res = search_text(key, query, pais, token, zona.get("centro"))
-            except urllib.error.HTTPError as e:
-                print(f"  !! {query}: HTTP {e.code} {e.read().decode()[:200]}")
-                break
-            except Exception as e:
-                print(f"  !! {query}: {e}")
+            res = None
+            for intento in range(3):
+                try:
+                    res = search_text(key, query, pais, token, zona.get("centro"))
+                    break
+                except urllib.error.HTTPError as e:
+                    detalle = e.read().decode()[:200]
+                    print(f"  !! {query}: HTTP {e.code} {detalle}")
+                    if e.code in (400, 401, 403):
+                        break
+                except Exception as e:
+                    print(f"  !! {query}: {e}")
+                time.sleep(2 * (intento + 1))  # cortes de red/SSL: reintenta
+            if res is None:
                 break
             consultas += 1
             for p in res.get("places", []):
